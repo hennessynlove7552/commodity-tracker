@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>메인 대시보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#197fe6",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans KR", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for data tables */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        /* Animation for live updates */
+        @keyframes flash-green {
+            0% { color: white; }
+            50% { color: #10b981; }
+            100% { color: #10b981; }
+        }
+        @keyframes flash-red {
+            0% { color: white; }
+            50% { color: #ef4444; }
+            100% { color: #ef4444; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111418] dark:text-white font-display overflow-x-hidden transition-colors duration-200">
+<div class="flex h-screen w-full flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e5e7eb] dark:border-[#293038] px-6 py-3 bg-white dark:bg-[#111921] z-10 shrink-0">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-[#111418] dark:text-white">
+<div class="size-8 rounded bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">candlestick_chart</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">CommodityView</h2>
+</div>
+<!-- Search Bar -->
+<label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full border border-[#d1d5db] dark:border-[#293038] bg-[#f9fafb] dark:bg-[#293038] overflow-hidden group focus-within:ring-2 focus-within:ring-primary/50">
+<div class="text-[#6b7280] dark:text-[#9dabb8] flex items-center justify-center pl-3">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 resize-none overflow-hidden bg-transparent text-[#111418] dark:text-white focus:outline-0 focus:ring-0 border-none h-full placeholder:text-[#9b7280] dark:placeholder:text-[#9dabb8] px-3 text-sm font-normal leading-normal" placeholder="자산 검색 (예: 금, 오일)" value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<div class="flex gap-2 items-center">
+<button class="flex items-center justify-center rounded-lg size-10 hover:bg-[#f3f4f6] dark:hover:bg-[#293038] text-[#111418] dark:text-white transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg size-10 hover:bg-[#f3f4f6] dark:hover:bg-[#293038] text-[#111418] dark:text-white transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="w-px h-8 bg-[#e5e7eb] dark:bg-[#293038] mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-medium text-[#111418] dark:text-white">김철수</p>
+<p class="text-xs text-[#6b7280] dark:text-[#9dabb8]">Premium Plan</p>
+</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-white dark:border-[#293038] shadow-sm" data-alt="User profile picture showing a professional headshot" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuClTns9qULrX_tyVRlwV0rxVMeIXJEHW3yc-WfcQ2F-HNIKQLUoVud-DQSN7xBn7uVQ3PGQlvgubdgdJAhI9FUe9KxkXss4giicDdDGpZ-Kb3tPys5faw1BghwXjIrh5ycJ3ihCiLcac9W9y1hiF_RnX3VYVBCPU_Mfak6iAo55-ie-hq6yf8-zj6-WcCQTni5i6VlrgDX-M3H4uZyKw_8ZHExp3_v8FL56Poui9g-FoM91ltjaBsJAiJfHWM3ZuEZvrv6w0bIzfC0");'></div>
+</div>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="flex-1 overflow-hidden flex flex-col md:flex-row bg-background-light dark:bg-background-dark">
+<!-- Left Sidebar (Navigation) - Collapsible on small screens -->
+<aside class="hidden lg:flex w-64 flex-col border-r border-[#e5e7eb] dark:border-[#293038] bg-white dark:bg-[#111921] shrink-0">
+<nav class="flex flex-col gap-2 p-4">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                        대시보드
+                    </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6b7280] dark:text-[#9dabb8] hover:bg-[#f3f4f6] dark:hover:bg-[#293038] font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">show_chart</span>
+                        시장 분석
+                    </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6b7280] dark:text-[#9dabb8] hover:bg-[#f3f4f6] dark:hover:bg-[#293038] font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">list_alt</span>
+                        관심 종목
+                    </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6b7280] dark:text-[#9dabb8] hover:bg-[#f3f4f6] dark:hover:bg-[#293038] font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">newspaper</span>
+                        뉴스 피드
+                    </a>
+<div class="my-2 border-t border-[#e5e7eb] dark:border-[#293038]"></div>
+<p class="px-3 py-2 text-xs font-semibold text-[#6b7280] dark:text-[#64748b] uppercase tracking-wider">포트폴리오</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6b7280] dark:text-[#9dabb8] hover:bg-[#f3f4f6] dark:hover:bg-[#293038] font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">pie_chart</span>
+                        자산 현황
+                    </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6b7280] dark:text-[#9dabb8] hover:bg-[#f3f4f6] dark:hover:bg-[#293038] font-medium transition-colors" href="#">
+<span class="material-symbols-outlined">history</span>
+                        거래 내역
+                    </a>
+</nav>
+</aside>
+<!-- Center Scrollable Area -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 lg:p-8">
+<div class="max-w-[1400px] mx-auto flex flex-col gap-6">
+<!-- Stats Section (Key Indices) -->
+<div>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-[#111418] dark:text-white text-lg font-bold leading-tight">주요 지수 요약</h3>
+<span class="text-xs text-[#6b7280] dark:text-[#9dabb8] flex items-center gap-1">
+<span class="size-2 rounded-full bg-green-500 animate-pulse"></span> 실시간 업데이트 중
+                            </span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Gold Card -->
+<div class="flex flex-col gap-2 rounded-xl p-5 bg-white dark:bg-[#1e2732] shadow-sm border border-[#e5e7eb] dark:border-[#293038]">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-[#fbbf24]"></div>
+<p class="text-[#6b7280] dark:text-[#9dabb8] text-sm font-medium">Gold (금)</p>
+</div>
+<span class="material-symbols-outlined text-[#6b7280] dark:text-[#9dabb8] text-[18px]">more_horiz</span>
+</div>
+<div class="flex items-end justify-between mt-1">
+<p class="text-[#111418] dark:text-white text-2xl font-bold tracking-tight">$2,035.40</p>
+<div class="flex items-center text-[#10b981] bg-[#10b981]/10 px-1.5 py-0.5 rounded text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px]">arrow_drop_up</span>
+<span>0.45%</span>
+</div>
+</div>
+</div>
+<!-- Silver Card -->
+<div class="flex flex-col gap-2 rounded-xl p-5 bg-white dark:bg-[#1e2732] shadow-sm border border-[#e5e7eb] dark:border-[#293038]">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-[#94a3b8]"></div>
+<p class="text-[#6b7280] dark:text-[#9dabb8] text-sm font-medium">Silver (은)</p>
+</div>
+<span class="material-symbols-outlined text-[#6b7280] dark:text-[#9dabb8] text-[18px]">more_horiz</span>
+</div>
+<div class="flex items-end justify-between mt-1">
+<p class="text-[#111418] dark:text-white text-2xl font-bold tracking-tight">$22.85</p>
+<div class="flex items-center text-[#ef4444] bg-[#ef4444]/10 px-1.5 py-0.5 rounded text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+<span>1.20%</span>
+</div>
+</div>
+</div>
+<!-- WTI Crude Card -->
+<div class="flex flex-col gap-2 rounded-xl p-5 bg-white dark:bg-[#1e2732] shadow-sm border border-[#e5e7eb] dark:border-[#293038] ring-2 ring-primary/20">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-[#0ea5e9]"></div>
+<p class="text-[#6b7280] dark:text-[#9dabb8] text-sm font-medium">WTI Crude (원유)</p>
+</div>
+<span class="material-symbols-outlined text-[#6b7280] dark:text-[#9dabb8] text-[18px]">more_horiz</span>
+</div>
+<div class="flex items-end justify-between mt-1">
+<p class="text-[#111418] dark:text-white text-2xl font-bold tracking-tight">$78.50</p>
+<div class="flex items-center text-[#10b981] bg-[#10b981]/10 px-1.5 py-0.5 rounded text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px]">arrow_drop_up</span>
+<span>2.15%</span>
+</div>
+</div>
+</div>
+<!-- Copper Card -->
+<div class="flex flex-col gap-2 rounded-xl p-5 bg-white dark:bg-[#1e2732] shadow-sm border border-[#e5e7eb] dark:border-[#293038]">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-[#f97316]"></div>
+<p class="text-[#6b7280] dark:text-[#9dabb8] text-sm font-medium">Copper (구리)</p>
+</div>
+<span class="material-symbols-outlined text-[#6b7280] dark:text-[#9dabb8] text-[18px]">more_horiz</span>
+</div>
+<div class="flex items-end justify-between mt-1">
+<p class="text-[#111418] dark:text-white text-2xl font-bold tracking-tight">$3.85</p>
+<div class="flex items-center text-[#10b981] bg-[#10b981]/10 px-1.5 py-0.5 rounded text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px]">arrow_drop_up</span>
+<span>0.10%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Grid Area -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Chart Section (Spans 2 columns) -->
+<div class="lg:col-span-2 flex flex-col rounded-xl bg-white dark:bg-[#1e2732] shadow-sm border border-[#e5e7eb] dark:border-[#293038] overflow-hidden">
+<!-- Chart Header -->
+<div class="p-6 border-b border-[#e5e7eb] dark:border-[#293038] flex flex-wrap gap-4 justify-between items-center">
+<div>
+<div class="flex items-baseline gap-3">
+<h2 class="text-[#111418] dark:text-white text-xl font-bold">WTI Crude Oil</h2>
+<span class="text-sm text-[#6b7280] dark:text-[#9dabb8]">CL=F</span>
+</div>
+<div class="flex gap-2 items-center mt-1">
+<span class="text-2xl font-bold text-[#111418] dark:text-white">$78.50</span>
+<span class="text-[#10b981] text-sm font-medium flex items-center">
+                                            +1.65 (2.15%)
+                                        </span>
+</div>
+</div>
+<!-- Timeframe Toggles -->
+<div class="flex h-9 items-center justify-center rounded-lg bg-[#f3f4f6] dark:bg-[#293038] p-1">
+<label class="cursor-pointer px-3 py-1 rounded-md text-xs font-medium text-[#6b7280] dark:text-[#9dabb8] hover:text-[#111418] dark:hover:text-white transition-colors">
+<input class="hidden" name="timeframe" type="radio" value="1H"/> 1H
+                                    </label>
+<label class="cursor-pointer px-3 py-1 rounded-md bg-white dark:bg-[#111921] shadow-sm text-xs font-medium text-[#111418] dark:text-white transition-colors">
+<input checked="" class="hidden" name="timeframe" type="radio" value="1D"/> 1D
+                                    </label>
+<label class="cursor-pointer px-3 py-1 rounded-md text-xs font-medium text-[#6b7280] dark:text-[#9dabb8] hover:text-[#111418] dark:hover:text-white transition-colors">
+<input class="hidden" name="timeframe" type="radio" value="1W"/> 1W
+                                    </label>
+<label class="cursor-pointer px-3 py-1 rounded-md text-xs font-medium text-[#6b7280] dark:text-[#9dabb8] hover:text-[#111418] dark:hover:text-white transition-colors">
+<input class="hidden" name="timeframe" type="radio" value="1M"/> 1M
+                                    </label>
+</div>
+</div>
+<!-- Chart Visualization -->
+<div class="p-6 h-[400px] flex flex-col justify-between relative group">
+<!-- Grid Lines -->
+<div class="absolute inset-x-6 inset-y-6 flex flex-col justify-between pointer-events-none">
+<div class="w-full h-px bg-[#e5e7eb] dark:bg-[#293038] border-t border-dashed border-[#d1d5db] dark:border-[#475569]"></div>
+<div class="w-full h-px bg-[#e5e7eb] dark:bg-[#293038] border-t border-dashed border-[#d1d5db] dark:border-[#475569]"></div>
+<div class="w-full h-px bg-[#e5e7eb] dark:bg-[#293038] border-t border-dashed border-[#d1d5db] dark:border-[#475569]"></div>
+<div class="w-full h-px bg-[#e5e7eb] dark:bg-[#293038] border-t border-dashed border-[#d1d5db] dark:border-[#475569]"></div>
+<div class="w-full h-px bg-[#e5e7eb] dark:bg-[#293038] border-t border-dashed border-[#d1d5db] dark:border-[#475569]"></div>
+</div>
+<!-- SVG Chart Path -->
+<div class="relative z-0 h-full w-full flex items-end pb-8">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 1000 300">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#197fe6" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#197fe6" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,250 C100,240 200,260 300,200 C400,140 500,180 600,100 C700,20 800,80 900,60 L1000,40" fill="none" stroke="#197fe6" stroke-linecap="round" stroke-width="3" vector-effect="non-scaling-stroke"></path>
+<path d="M0,250 C100,240 200,260 300,200 C400,140 500,180 600,100 C700,20 800,80 900,60 L1000,40 V300 H0 Z" fill="url(#chartGradient)" stroke="none"></path>
+<!-- Interactive Point -->
+<circle class="dark:stroke-[#1e2732]" cx="1000" cy="40" fill="#197fe6" r="6" stroke="white" stroke-width="2"></circle>
+<line class="opacity-50" stroke="#197fe6" stroke-dasharray="4 4" stroke-width="1" x1="1000" x2="1000" y1="40" y2="300"></line>
+</svg>
+</div>
+<!-- X-Axis Labels -->
+<div class="flex justify-between text-xs text-[#6b7280] dark:text-[#9dabb8] font-medium pt-2 border-t border-[#e5e7eb] dark:border-[#293038]">
+<span>09:00</span>
+<span>10:00</span>
+<span>11:00</span>
+<span>12:00</span>
+<span>13:00</span>
+<span>14:00</span>
+<span>15:00</span>
+</div>
+</div>
+</div>
+<!-- Watchlist Section (Spans 1 column) -->
+<div class="flex flex-col rounded-xl bg-white dark:bg-[#1e2732] shadow-sm border border-[#e5e7eb] dark:border-[#293038] overflow-hidden">
+<div class="p-4 border-b border-[#e5e7eb] dark:border-[#293038] flex items-center justify-between">
+<h3 class="text-[#111418] dark:text-white text-lg font-bold">관심 종목</h3>
+<button class="text-primary text-sm font-medium hover:underline">더보기</button>
+</div>
+<div class="flex-1 overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#f9fafb] dark:bg-[#293038]/50 border-b border-[#e5e7eb] dark:border-[#293038]">
+<th class="p-4 text-xs font-semibold text-[#6b7280] dark:text-[#9dabb8] uppercase tracking-wider">종목</th>
+<th class="p-4 text-xs font-semibold text-[#6b7280] dark:text-[#9dabb8] uppercase tracking-wider text-right">가격</th>
+<th class="p-4 text-xs font-semibold text-[#6b7280] dark:text-[#9dabb8] uppercase tracking-wider text-right">변동률</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#e5e7eb] dark:divide-[#293038]">
+<!-- Row 1 -->
+<tr class="group hover:bg-[#f3f4f6] dark:hover:bg-[#293038] transition-colors cursor-pointer">
+<td class="p-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111418] dark:text-white">Natural Gas</span>
+<span class="text-xs text-[#6b7280] dark:text-[#9dabb8]">NG=F</span>
+</div>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#111418] dark:text-white">$1.85</span>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#ef4444]">-2.45%</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group hover:bg-[#f3f4f6] dark:hover:bg-[#293038] transition-colors cursor-pointer">
+<td class="p-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111418] dark:text-white">Platinum</span>
+<span class="text-xs text-[#6b7280] dark:text-[#9dabb8]">PL=F</span>
+</div>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#111418] dark:text-white">$885.20</span>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#10b981]">+0.85%</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group hover:bg-[#f3f4f6] dark:hover:bg-[#293038] transition-colors cursor-pointer">
+<td class="p-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111418] dark:text-white">Soybean</span>
+<span class="text-xs text-[#6b7280] dark:text-[#9dabb8]">ZS=F</span>
+</div>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#111418] dark:text-white">$1,154.00</span>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#10b981]">+0.30%</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="group hover:bg-[#f3f4f6] dark:hover:bg-[#293038] transition-colors cursor-pointer">
+<td class="p-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111418] dark:text-white">Coffee</span>
+<span class="text-xs text-[#6b7280] dark:text-[#9dabb8]">KC=F</span>
+</div>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#111418] dark:text-white">$185.40</span>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#ef4444]">-0.15%</span>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="group hover:bg-[#f3f4f6] dark:hover:bg-[#293038] transition-colors cursor-pointer">
+<td class="p-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111418] dark:text-white">Corn</span>
+<span class="text-xs text-[#6b7280] dark:text-[#9dabb8]">ZC=F</span>
+</div>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#111418] dark:text-white">$430.50</span>
+</td>
+<td class="p-4 text-right">
+<span class="text-sm font-medium text-[#ef4444]">-1.10%</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- News Feed Section -->
+<div class="flex flex-col rounded-xl bg-white dark:bg-[#1e2732] shadow-sm border border-[#e5e7eb] dark:border-[#293038] p-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-[#111418] dark:text-white text-lg font-bold">최신 뉴스</h3>
+<button class="flex items-center gap-1 text-sm text-[#6b7280] dark:text-[#9dabb8] hover:text-primary transition-colors">
+<span>모두 보기</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- News Item 1 -->
+<div class="flex gap-4 group cursor-pointer">
+<div class="w-24 h-24 shrink-0 rounded-lg bg-cover bg-center overflow-hidden" data-alt="Oil rig in ocean sunset" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB0vglgX53vU0hMCrdnb2rukdMGHWs2yJe6y3QoW28YGvzRpyMrbpWObgax3TTe9mhtIymWnm7BOQrvZK_Dn4dr_PQ9PxcZnyC9n5GYSDTpkm_NEN_kTYyCtvdbz3s8giVIL0hHn-FX-tXe1UoWhV2DHm5foWj0Iogfazn0DUh-5jkYQIgN48ZzlGJjaPTFvdFJZ0If9yBhiPxWkeEVvkw9Vn_WxwVLOGN9_uIvBO1x9QVy8f8DQO9sK7pGa7Ez1NJ_ushQLkw52kI");'></div>
+<div class="flex flex-col justify-between">
+<h4 class="text-sm font-semibold text-[#111418] dark:text-white leading-snug group-hover:text-primary transition-colors">중동 긴장 고조로 인한 국제 유가 3% 급등, WTI 80달러 돌파 임박</h4>
+<div class="flex items-center gap-2 text-xs text-[#6b7280] dark:text-[#9dabb8]">
+<span>Bloomberg</span>
+<span class="size-1 bg-[#6b7280] rounded-full"></span>
+<span>15분 전</span>
+</div>
+</div>
+</div>
+<!-- News Item 2 -->
+<div class="flex gap-4 group cursor-pointer">
+<div class="w-24 h-24 shrink-0 rounded-lg bg-cover bg-center overflow-hidden" data-alt="Gold bars stacked in vault" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAGZZ1ezUZg4C4qrGHODdTazdF5Dls9n495XW7Ht3ztmdK9YDLhziVQUY2LHWI5lclDCzxfRLDYNzOIABskOOMVDG7LO2KQui76lwH27Ja8Ju-pcj4BdMLG9Tv7Yo1agWI4pQ1hAJQidCE9koayQqqtgKn8hS8uQpQfy5RCVqSFpnYRJGNOWOPQzmuLY3Sv6pMHnutwK2mhC0O3_IzOi9QcXEV0IXjnril31xNMzlkVxUxOLtSJSM4siiXEKWJfHeB98xORJOVxKPo");'></div>
+<div class="flex flex-col justify-between">
+<h4 class="text-sm font-semibold text-[#111418] dark:text-white leading-snug group-hover:text-primary transition-colors">연준 금리 인하 기대감에 금값 사상 최고치 경신, 안전자산 선호 심리 강화</h4>
+<div class="flex items-center gap-2 text-xs text-[#6b7280] dark:text-[#9dabb8]">
+<span>Reuters</span>
+<span class="size-1 bg-[#6b7280] rounded-full"></span>
+<span>1시간 전</span>
+</div>
+</div>
+</div>
+<!-- News Item 3 -->
+<div class="flex gap-4 group cursor-pointer">
+<div class="w-24 h-24 shrink-0 rounded-lg bg-cover bg-center overflow-hidden" data-alt="Copper wires close up detail" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAooFI7nkZhGVGKMHPPAaYTW_Qqll5GLYmQ-hjqSjpMtG2bi6pFZy-0HdzmzSjCWFl71JziaBEwR-hhxuqPS9GKiQpi8CW9NRs8GiwKFozfE2prvWtoZahbUwqVpw-mubW0nOKYDuJ9gbrL3uOYNdLT2G2vXPzTjSsqCiS60xc6OlQdE8ZJzsgeNq-ZOWDN1JjNeIloq3iUA9hRR8BHCSwz7gGoUAdJz2Sl5GXiD1Q6YQzzS0uveiUXJA-Dt-Xre_127CsJDHstV_A");'></div>
+<div class="flex flex-col justify-between">
+<h4 class="text-sm font-semibold text-[#111418] dark:text-white leading-snug group-hover:text-primary transition-colors">중국 제조업 지표 호조에 구리 가격 반등, 원자재 시장 활기</h4>
+<div class="flex items-center gap-2 text-xs text-[#6b7280] dark:text-[#9dabb8]">
+<span>WSJ</span>
+<span class="size-1 bg-[#6b7280] rounded-full"></span>
+<span>2시간 전</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<footer class="mt-12 mb-6 flex justify-between items-center text-xs text-[#6b7280] dark:text-[#64748b]">
+<div class="flex gap-4">
+<a class="hover:text-[#111418] dark:hover:text-white" href="#">이용약관</a>
+<a class="hover:text-[#111418] dark:hover:text-white" href="#">개인정보처리방침</a>
+<a class="hover:text-[#111418] dark:hover:text-white" href="#">고객센터</a>
+</div>
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-green-500"></span>
+<span>System Operational | Latency: 24ms</span>
+</div>
+</footer>
+</div>
+</main>
+</div>
+</body></html>

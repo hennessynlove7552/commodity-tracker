@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Raw Material Monitor - Interest Settings</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#197fe6",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                        "card-dark": "#293038", // Kept from examples for consistency
+                        "card-light": "#ffffff",
+                        "text-secondary-dark": "#9dabb8",
+                        "text-secondary-light": "#64748b",
+                        "border-dark": "#293038",
+                        "border-light": "#e2e8f0",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar for the lists */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 20px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display text-slate-900 dark:text-white overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-light dark:border-border-dark bg-white dark:bg-background-dark px-6 py-3 shrink-0 z-20">
+<div class="flex items-center gap-4">
+<div class="size-8 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">candlestick_chart</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">Raw Material Monitor</h2>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<nav class="hidden md:flex gap-6 text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+<a class="hover:text-primary transition-colors" href="#">대시보드</a>
+<a class="text-primary" href="#">설정</a>
+<a class="hover:text-primary transition-colors" href="#">리포트</a>
+</nav>
+<div class="w-px h-6 bg-border-light dark:bg-border-dark hidden md:block"></div>
+<div class="flex gap-2">
+<button class="flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-background-light dark:bg-card-dark text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-border-light dark:border-border-dark" data-alt="User profile avatar gradient" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCllJhb6K91fNWXlW9jHtVjKBb2R2qxDkuoY37EmHKZoAv5dKMFBaQFTiLldduqWEhgUI9TIwfXaCVthMa51pXrjxipJ1fW7RYBKw56wooxXDQB_HpBOJC7bkaio0mtjR0CX-QIR8BNNp3-w6dE4YF3eQXA3VsiKLwuMQ1-jcIus2Xu2eikATIKIMMrGPdkNdHc_O_Yxw8gcgpGaz6osmICJ7_QzCUODxW-WlKD09a760B1j_Fx00jz3egjD08G2sAbaRx9PEVBGBE");'>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Layout -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Main Content Container -->
+<main class="flex-1 flex flex-col max-w-[1400px] mx-auto w-full px-6 py-6 h-full overflow-hidden">
+<!-- Page Heading -->
+<div class="flex flex-col gap-2 mb-6 shrink-0">
+<h1 class="text-2xl md:text-[32px] font-bold leading-tight">관심 목록 설정</h1>
+<p class="text-text-secondary-light dark:text-text-secondary-dark text-sm">관심 있는 원자재를 추가하고 가격 변동 알림을 설정하세요. 드래그하여 순서를 변경할 수 있습니다.</p>
+</div>
+<!-- Split Pane Content -->
+<div class="flex flex-col lg:flex-row gap-6 flex-1 overflow-hidden min-h-0">
+<!-- LEFT COLUMN: Source (Available Materials) -->
+<section class="flex flex-col flex-1 bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark overflow-hidden shadow-sm">
+<div class="p-4 border-b border-border-light dark:border-border-dark flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<h2 class="text-lg font-bold">사용 가능한 원자재</h2>
+<span class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark bg-background-light dark:bg-background-dark px-2 py-1 rounded">248개 항목</span>
+</div>
+<!-- Search Bar -->
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-text-secondary-light dark:text-text-secondary-dark">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full p-3 pl-10 text-sm rounded-lg border-none bg-background-light dark:bg-background-dark text-slate-900 dark:text-white placeholder-text-secondary-light dark:placeholder-text-secondary-dark focus:ring-2 focus:ring-primary" placeholder="원자재 이름 또는 티커 검색 (예: Gold, Crude Oil)" type="text"/>
+</div>
+<!-- Chips / Filters -->
+<div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+<button class="whitespace-nowrap px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium">전체</button>
+<button class="whitespace-nowrap px-3 py-1.5 rounded-lg bg-background-light dark:bg-background-dark hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-text-secondary-dark text-sm font-medium transition-colors">에너지</button>
+<button class="whitespace-nowrap px-3 py-1.5 rounded-lg bg-background-light dark:bg-background-dark hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-text-secondary-dark text-sm font-medium transition-colors">금속</button>
+<button class="whitespace-nowrap px-3 py-1.5 rounded-lg bg-background-light dark:bg-background-dark hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-text-secondary-dark text-sm font-medium transition-colors">농산물</button>
+<button class="whitespace-nowrap px-3 py-1.5 rounded-lg bg-background-light dark:bg-background-dark hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-text-secondary-dark text-sm font-medium transition-colors">지수</button>
+</div>
+</div>
+<!-- Available List -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-2">
+<!-- Item 1 -->
+<div class="group flex items-center justify-between p-3 mb-2 rounded-lg hover:bg-background-light dark:hover:bg-slate-800 transition-all cursor-pointer border border-transparent hover:border-border-light dark:hover:border-slate-700">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
+<span class="material-symbols-outlined text-xl">savings</span>
+</div>
+<div>
+<p class="font-bold text-sm">Gold (금)</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">XAU/USD • $2,045.30</p>
+</div>
+</div>
+<button class="size-8 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<!-- Item 2 -->
+<div class="group flex items-center justify-between p-3 mb-2 rounded-lg hover:bg-background-light dark:hover:bg-slate-800 transition-all cursor-pointer border border-transparent hover:border-border-light dark:hover:border-slate-700">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-xl">diamond</span>
+</div>
+<div>
+<p class="font-bold text-sm">Silver (은)</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">XAG/USD • $24.12</p>
+</div>
+</div>
+<button class="size-8 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<!-- Item 3 -->
+<div class="group flex items-center justify-between p-3 mb-2 rounded-lg hover:bg-background-light dark:hover:bg-slate-800 transition-all cursor-pointer border border-transparent hover:border-border-light dark:hover:border-slate-700">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined text-xl">propane</span>
+</div>
+<div>
+<p class="font-bold text-sm">Natural Gas (천연가스)</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">NG • $2.56</p>
+</div>
+</div>
+<button class="size-8 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<!-- Item 4 -->
+<div class="group flex items-center justify-between p-3 mb-2 rounded-lg hover:bg-background-light dark:hover:bg-slate-800 transition-all cursor-pointer border border-transparent hover:border-border-light dark:hover:border-slate-700">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined text-xl">nutrition</span>
+</div>
+<div>
+<p class="font-bold text-sm">Corn (옥수수)</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">ZC • $478.25</p>
+</div>
+</div>
+<button class="size-8 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<!-- Item 5 -->
+<div class="group flex items-center justify-between p-3 mb-2 rounded-lg hover:bg-background-light dark:hover:bg-slate-800 transition-all cursor-pointer border border-transparent hover:border-border-light dark:hover:border-slate-700">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined text-xl">water_drop</span>
+</div>
+<div>
+<p class="font-bold text-sm">Heating Oil</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">HO • $2.64</p>
+</div>
+</div>
+<button class="size-8 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<!-- More filler items implied -->
+</div>
+</section>
+<!-- RIGHT COLUMN: Target (My Watchlist) -->
+<section class="flex flex-col flex-1 bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark overflow-hidden shadow-sm">
+<div class="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-slate-50 dark:bg-[#232930]">
+<h2 class="text-lg font-bold text-primary">나의 관심 목록</h2>
+<span class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">5개 선택됨</span>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-2 bg-slate-50 dark:bg-[#232930]">
+<!-- Watchlist Item 1 (Active Alert) -->
+<div class="flex flex-col sm:flex-row items-center gap-3 p-3 mb-3 rounded-lg bg-white dark:bg-[#2f3842] shadow-sm border border-border-light dark:border-slate-700 group">
+<!-- Drag Handle -->
+<div class="text-text-secondary-light dark:text-slate-600 cursor-grab hover:text-white">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<!-- Info -->
+<div class="flex items-center gap-3 flex-1 w-full sm:w-auto">
+<div class="size-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 shrink-0">
+<span class="material-symbols-outlined text-lg">oil_barrel</span>
+</div>
+<div class="flex flex-col min-w-[100px]">
+<p class="font-bold text-sm truncate">Brent Crude Oil</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">$78.45</p>
+</div>
+</div>
+<!-- Controls -->
+<div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+<!-- Alert Settings Popover Trigger / Inline Form -->
+<div class="flex items-center gap-2 bg-background-light dark:bg-background-dark rounded-lg px-2 py-1 border border-primary/30">
+<button class="text-primary">
+<span class="material-symbols-outlined text-xl fill-1">notifications_active</span>
+</button>
+<div class="h-4 w-px bg-border-light dark:bg-border-dark"></div>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark whitespace-nowrap">목표가</span>
+<input class="w-16 h-6 text-right text-xs bg-transparent border-none p-0 focus:ring-0 text-primary font-bold" type="text" value="$80.00"/>
+</div>
+<button class="size-8 flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+<!-- Watchlist Item 2 (Inactive Alert) -->
+<div class="flex flex-col sm:flex-row items-center gap-3 p-3 mb-3 rounded-lg bg-white dark:bg-[#2f3842] shadow-sm border border-border-light dark:border-slate-700 group">
+<div class="text-text-secondary-light dark:text-slate-600 cursor-grab hover:text-white">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="flex items-center gap-3 flex-1 w-full sm:w-auto">
+<div class="size-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0">
+<span class="material-symbols-outlined text-lg">bolt</span>
+</div>
+<div class="flex flex-col min-w-[100px]">
+<p class="font-bold text-sm truncate">Copper (구리)</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">$3.84</p>
+</div>
+</div>
+<div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+<div class="flex items-center gap-2 bg-background-light dark:bg-background-dark rounded-lg px-2 py-1 border border-border-light dark:border-slate-600 opacity-60 hover:opacity-100 transition-opacity">
+<button class="text-text-secondary-light dark:text-text-secondary-dark hover:text-primary">
+<span class="material-symbols-outlined text-xl">notifications_off</span>
+</button>
+<div class="h-4 w-px bg-border-light dark:bg-border-dark"></div>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark whitespace-nowrap">알림 설정</span>
+</div>
+<button class="size-8 flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+<!-- Watchlist Item 3 (Percent Alert) -->
+<div class="flex flex-col sm:flex-row items-center gap-3 p-3 mb-3 rounded-lg bg-white dark:bg-[#2f3842] shadow-sm border border-border-light dark:border-slate-700 group">
+<div class="text-text-secondary-light dark:text-slate-600 cursor-grab hover:text-white">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="flex items-center gap-3 flex-1 w-full sm:w-auto">
+<div class="size-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+<span class="material-symbols-outlined text-lg">science</span>
+</div>
+<div class="flex flex-col min-w-[100px]">
+<p class="font-bold text-sm truncate">Lithium (리튬)</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">$13,500</p>
+</div>
+</div>
+<div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+<div class="flex items-center gap-2 bg-background-light dark:bg-background-dark rounded-lg px-2 py-1 border border-primary/30">
+<button class="text-primary">
+<span class="material-symbols-outlined text-xl fill-1">notifications_active</span>
+</button>
+<div class="h-4 w-px bg-border-light dark:bg-border-dark"></div>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark whitespace-nowrap">등락폭</span>
+<input class="w-16 h-6 text-right text-xs bg-transparent border-none p-0 focus:ring-0 text-primary font-bold" type="text" value="± 5%"/>
+</div>
+<button class="size-8 flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+<!-- Watchlist Item 4 -->
+<div class="flex flex-col sm:flex-row items-center gap-3 p-3 mb-3 rounded-lg bg-white dark:bg-[#2f3842] shadow-sm border border-border-light dark:border-slate-700 group">
+<div class="text-text-secondary-light dark:text-slate-600 cursor-grab hover:text-white">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="flex items-center gap-3 flex-1 w-full sm:w-auto">
+<div class="size-8 rounded-full bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0">
+<span class="material-symbols-outlined text-lg">forest</span>
+</div>
+<div class="flex flex-col min-w-[100px]">
+<p class="font-bold text-sm truncate">Lumber (목재)</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">$524.10</p>
+</div>
+</div>
+<div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+<div class="flex items-center gap-2 bg-background-light dark:bg-background-dark rounded-lg px-2 py-1 border border-border-light dark:border-slate-600 opacity-60 hover:opacity-100 transition-opacity">
+<button class="text-text-secondary-light dark:text-text-secondary-dark hover:text-primary">
+<span class="material-symbols-outlined text-xl">notifications_off</span>
+</button>
+<div class="h-4 w-px bg-border-light dark:bg-border-dark"></div>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark whitespace-nowrap">알림 설정</span>
+</div>
+<button class="size-8 flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+<!-- Watchlist Item 5 -->
+<div class="flex flex-col sm:flex-row items-center gap-3 p-3 mb-3 rounded-lg bg-white dark:bg-[#2f3842] shadow-sm border border-border-light dark:border-slate-700 group">
+<div class="text-text-secondary-light dark:text-slate-600 cursor-grab hover:text-white">
+<span class="material-symbols-outlined">drag_indicator</span>
+</div>
+<div class="flex items-center gap-3 flex-1 w-full sm:w-auto">
+<div class="size-8 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400 shrink-0">
+<span class="material-symbols-outlined text-lg">agriculture</span>
+</div>
+<div class="flex flex-col min-w-[100px]">
+<p class="font-bold text-sm truncate">Wheat (밀)</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">$602.50</p>
+</div>
+</div>
+<div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+<div class="flex items-center gap-2 bg-background-light dark:bg-background-dark rounded-lg px-2 py-1 border border-border-light dark:border-slate-600 opacity-60 hover:opacity-100 transition-opacity">
+<button class="text-text-secondary-light dark:text-text-secondary-dark hover:text-primary">
+<span class="material-symbols-outlined text-xl">notifications_off</span>
+</button>
+<div class="h-4 w-px bg-border-light dark:bg-border-dark"></div>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark whitespace-nowrap">알림 설정</span>
+</div>
+<button class="size-8 flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+<!-- Drop Zone Hint -->
+<div class="h-16 border-2 border-dashed border-border-light dark:border-slate-700 rounded-lg flex items-center justify-center text-text-secondary-light dark:text-text-secondary-dark text-sm bg-transparent">
+<span class="mr-2 material-symbols-outlined">add</span>여기로 드래그하여 추가하세요
+                        </div>
+</div>
+<!-- Footer Actions -->
+<div class="p-4 bg-white dark:bg-card-dark border-t border-border-light dark:border-border-dark flex justify-between items-center shrink-0">
+<div class="text-xs text-text-secondary-light dark:text-text-secondary-dark hidden sm:block">
+                            마지막 저장: 5분 전
+                         </div>
+<div class="flex gap-3 ml-auto">
+<button class="px-5 py-2 rounded-lg border border-border-light dark:border-slate-600 text-slate-700 dark:text-white text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                                취소
+                            </button>
+<button class="px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">
+                                변경사항 저장
+                            </button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>

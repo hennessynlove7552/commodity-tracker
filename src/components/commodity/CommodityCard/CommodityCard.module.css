@@ -1,0 +1,93 @@
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    transition: all var(--transition-base);
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-secondary);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.icon {
+    font-size: var(--text-3xl);
+}
+
+.name {
+    flex: 1;
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.watchlistBtn {
+    background: none;
+    border: none;
+    font-size: var(--text-xl);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    transition: transform var(--transition-fast);
+    color: var(--text-muted);
+}
+
+.watchlistBtn:hover {
+    transform: scale(1.2);
+}
+
+.watchlistBtn.active {
+    color: var(--color-warning);
+}
+
+.price {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.change {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.change.positive {
+    color: var(--color-success);
+}
+
+.change.negative {
+    color: var(--color-danger);
+}
+
+.changeAmount {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    opacity: 0.8;
+}
+
+.miniChart {
+    height: 40px;
+    margin-top: var(--spacing-sm);
+    opacity: 0.6;
+}
+
+.symbol {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}

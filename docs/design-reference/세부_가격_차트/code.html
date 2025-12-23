@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MarketViewer Pro - Detailed Price Chart</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#197fe6",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                        "surface-dark": "#1a222d",
+                        "surface-light": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for data tables */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #293038;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white overflow-x-hidden min-h-screen flex flex-col">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-[#293038] bg-surface-light dark:bg-[#111921] px-6 py-3">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-slate-900 dark:text-white">
+<div class="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">MarketViewer Pro</h2>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64 hidden md:flex">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full group">
+<div class="text-slate-500 dark:text-[#9dabb8] flex border-none bg-gray-100 dark:bg-[#293038] items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined" style="font-size: 20px;">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-gray-100 dark:bg-[#293038] focus:border-none h-full placeholder:text-slate-500 dark:placeholder:text-[#9dabb8] px-3 rounded-l-none border-l-0 pl-2 text-sm font-normal leading-normal" placeholder="Search asset..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<div class="hidden lg:flex items-center gap-6">
+<a class="text-slate-600 dark:text-gray-300 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">Dashboard</a>
+<a class="text-primary text-sm font-medium leading-normal" href="#">Markets</a>
+<a class="text-slate-600 dark:text-gray-300 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">Analysis</a>
+<a class="text-slate-600 dark:text-gray-300 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">News</a>
+</div>
+<div class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-[#293038]">
+<button class="text-slate-500 dark:text-gray-400 hover:text-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-9 ring-2 ring-transparent hover:ring-primary transition-all cursor-pointer" data-alt="User profile avatar image" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAa4p_wKLsVAnYI8tGF4Z2zvWXF8T3rXKyxIMAbFEBOcDRdsKN6bzGLpjmB3PPMc8XaDJTRceZFnE65444a5DtZvWPxrfR71FYqRKOe3JDtyvuZTp_yDonniMlqJlmx0pdsWbLLqchoh9vW6sSAcNrJHH2lO0R9uFsssxYpzpI1_trV-Xhu6PgAu1IuZGCEmk0HTaEOATeA3i0meoBoXWwNTuhmrkHFRdMTpDi05r9CySZzN2Eqa6PrZzIr3MQCh2B5WLfapa7mLJE");'></div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 h-[calc(100vh-64px)] overflow-hidden">
+<!-- Side Navigation (Collapsed on small screens) -->
+<aside class="w-20 lg:w-64 flex-shrink-0 flex flex-col bg-surface-light dark:bg-[#111921] border-r border-gray-200 dark:border-[#293038] h-full overflow-y-auto hidden md:flex">
+<div class="flex flex-col gap-1 p-4">
+<div class="flex flex-col mb-4 px-2 hidden lg:flex">
+<h1 class="text-slate-900 dark:text-white text-xs font-bold uppercase tracking-wider text-opacity-50 dark:text-opacity-50">Market Tools</h1>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#293038] hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">grid_view</span>
+<span class="text-sm font-medium hidden lg:block">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#293038] hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">visibility</span>
+<span class="text-sm font-medium hidden lg:block">Watchlist</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#293038] hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">pie_chart</span>
+<span class="text-sm font-medium hidden lg:block">Portfolio</span>
+</a>
+<div class="my-2 border-t border-gray-200 dark:border-[#293038]"></div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary" href="#">
+<span class="material-symbols-outlined fill-current">candlestick_chart</span>
+<span class="text-sm font-medium hidden lg:block">Advanced Chart</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#293038] hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">notifications_active</span>
+<span class="text-sm font-medium hidden lg:block">Alerts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#293038] hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">description</span>
+<span class="text-sm font-medium hidden lg:block">Reports</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-4 border-t border-gray-200 dark:border-[#293038]">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#293038] hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">settings</span>
+<span class="text-sm font-medium hidden lg:block">Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+<!-- Breadcrumbs & Header -->
+<div class="flex-shrink-0 px-6 py-4 border-b border-gray-200 dark:border-[#293038] bg-surface-light dark:bg-[#111921]">
+<div class="flex flex-wrap gap-2 mb-2 items-center text-xs">
+<a class="text-slate-500 dark:text-[#9dabb8] hover:text-primary transition-colors" href="#">Markets</a>
+<span class="text-slate-400 dark:text-[#55606c] material-symbols-outlined text-[12px]">chevron_right</span>
+<a class="text-slate-500 dark:text-[#9dabb8] hover:text-primary transition-colors" href="#">Commodities</a>
+<span class="text-slate-400 dark:text-[#55606c] material-symbols-outlined text-[12px]">chevron_right</span>
+<span class="text-slate-900 dark:text-white font-medium">Gold (XAU/USD)</span>
+</div>
+<div class="flex flex-wrap justify-between items-end gap-4">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-12 rounded-full bg-yellow-500/20 text-yellow-500 dark:text-yellow-400">
+<span class="material-symbols-outlined text-2xl">monetization_on</span>
+</div>
+<div>
+<div class="flex items-baseline gap-3">
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Gold Spot</h1>
+<span class="text-sm font-medium text-slate-500 dark:text-gray-400 bg-gray-100 dark:bg-[#293038] px-2 py-0.5 rounded">XAU/USD</span>
+</div>
+<div class="flex items-center gap-3 mt-1">
+<span class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">$2,034.50</span>
+<div class="flex items-center gap-1 text-[#0bda5b]">
+<span class="material-symbols-outlined text-lg">arrow_upward</span>
+<span class="text-sm font-bold">+12.40 (+0.61%)</span>
+</div>
+<span class="text-xs text-slate-500 dark:text-gray-500 ml-2">● Real-time Market Open</span>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="h-10 px-4 rounded-lg border border-gray-300 dark:border-[#293038] text-slate-700 dark:text-white font-medium hover:bg-gray-100 dark:hover:bg-[#293038] transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">star</span>
+<span>Watch</span>
+</button>
+<button class="h-10 px-6 rounded-lg bg-primary hover:bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2">
+<span>Trade Now</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Content Grid -->
+<div class="flex-1 flex flex-col lg:flex-row overflow-hidden bg-background-light dark:bg-background-dark">
+<!-- Chart Section (Left/Top) -->
+<div class="flex-1 flex flex-col min-h-[500px] lg:min-h-0 border-r border-gray-200 dark:border-[#293038] relative">
+<!-- Chart Controls -->
+<div class="flex flex-wrap items-center justify-between p-3 border-b border-gray-200 dark:border-[#293038] bg-surface-light dark:bg-[#161e27]">
+<div class="flex items-center gap-4 overflow-x-auto no-scrollbar">
+<div class="flex items-center bg-gray-100 dark:bg-[#293038] rounded-md p-1">
+<button class="px-3 py-1 rounded text-xs font-medium text-slate-600 dark:text-gray-400 hover:text-white hover:bg-primary/20 transition-colors">1m</button>
+<button class="px-3 py-1 rounded text-xs font-medium text-slate-600 dark:text-gray-400 hover:text-white hover:bg-primary/20 transition-colors">15m</button>
+<button class="px-3 py-1 rounded text-xs font-medium text-slate-600 dark:text-gray-400 hover:text-white hover:bg-primary/20 transition-colors">1H</button>
+<button class="px-3 py-1 rounded text-xs font-bold bg-primary text-white shadow-sm">1D</button>
+<button class="px-3 py-1 rounded text-xs font-medium text-slate-600 dark:text-gray-400 hover:text-white hover:bg-primary/20 transition-colors">1W</button>
+</div>
+<div class="w-px h-6 bg-gray-200 dark:bg-[#293038]"></div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-[#293038] text-slate-600 dark:text-gray-300 text-sm font-medium">
+<span class="material-symbols-outlined text-lg">candlestick_chart</span>
+<span>Candles</span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-[#293038] text-slate-600 dark:text-gray-300 text-sm font-medium">
+<span class="material-symbols-outlined text-lg">function</span>
+<span>Indicators</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-2 ml-auto">
+<button class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-[#293038] text-slate-500 dark:text-gray-400">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+<button class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-[#293038] text-slate-500 dark:text-gray-400">
+<span class="material-symbols-outlined text-xl">fullscreen</span>
+</button>
+</div>
+</div>
+<!-- Main Chart Canvas Area -->
+<div class="flex-1 relative bg-[#11161d] w-full h-full">
+<!-- Simulated Chart Image -->
+<div class="absolute inset-0 p-4 pb-8 flex flex-col">
+<!-- Overlay Info -->
+<div class="absolute top-4 left-6 z-10 flex gap-4 text-xs font-mono">
+<span class="text-gray-400">O: <span class="text-white">2030.12</span></span>
+<span class="text-gray-400">H: <span class="text-[#0bda5b]">2041.50</span></span>
+<span class="text-gray-400">L: <span class="text-[#ff4d4d]">2028.90</span></span>
+<span class="text-gray-400">C: <span class="text-white">2034.50</span></span>
+<span class="text-gray-400">Vol: <span class="text-blue-400">142K</span></span>
+</div>
+<!-- Main Chart Visualization Placeholder -->
+<div class="flex-1 w-full bg-cover bg-center rounded opacity-90" data-alt="Technical candlestick chart with green and red candles showing price upward trend on dark background with grid lines" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB_tUDgsCQvWaGhjz2QACLAluhqnOiPu8FjrwlkGT1XBsWb7PjePT57UUBcbeXyfNJi3210vXuTC9KqChYLK_2yXFEsVeDGmBs9DwjyLpytBCehMX9TZbo5zgTBiPCtbFdeGsGwnJQWBRiADJP9Y0Ym3S87YL4jEogNLLtm9yIM5VhlLft15sTR7g3r_V1m1FOWRvY23q6LLvfs1rzoVhZloO6RVb2-46QrVzjK5y7LxLTYsf184DNZ813PimhIzCkP4kx-QPNp9Qk'); filter: contrast(1.1) saturate(0.8) brightness(0.7);">
+</div>
+<!-- X Axis Labels (Simulated) -->
+<div class="h-6 flex justify-between items-center text-[10px] text-gray-500 font-mono mt-2 px-4 border-t border-[#293038]">
+<span>10:00</span>
+<span>11:00</span>
+<span>12:00</span>
+<span>13:00</span>
+<span>14:00</span>
+<span>15:00</span>
+<span>16:00</span>
+</div>
+</div>
+<!-- Y Axis Price Labels (Right Side) -->
+<div class="absolute right-0 top-0 bottom-8 w-14 border-l border-[#293038] bg-[#11161d] flex flex-col justify-between py-6 items-center text-[10px] text-gray-400 font-mono">
+<span class="text-[#0bda5b] bg-[#0bda5b]/10 px-1 rounded">2045.00</span>
+<span>2040.00</span>
+<span>2035.00</span>
+<span class="text-white bg-primary px-1 rounded">2034.50</span>
+<span>2030.00</span>
+<span>2025.00</span>
+<span>2020.00</span>
+</div>
+</div>
+</div>
+<!-- Right Sidebar (Order Book & Details) -->
+<div class="w-full lg:w-[340px] flex-shrink-0 flex flex-col bg-surface-light dark:bg-[#161e27] overflow-hidden border-t lg:border-t-0">
+<!-- Tabs -->
+<div class="flex border-b border-gray-200 dark:border-[#293038]">
+<button class="flex-1 py-3 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5">Order Book</button>
+<button class="flex-1 py-3 text-sm font-medium text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white transition-colors">Trades</button>
+<button class="flex-1 py-3 text-sm font-medium text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white transition-colors">Depth</button>
+</div>
+<!-- Order Book Header -->
+<div class="grid grid-cols-3 px-4 py-2 text-[11px] font-medium text-slate-500 dark:text-gray-500 uppercase tracking-wider">
+<div class="text-left">Price (USD)</div>
+<div class="text-right">Amount</div>
+<div class="text-right">Total</div>
+</div>
+<!-- Order Book List (Asks - Selling - Red) -->
+<div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+<div class="flex flex-col-reverse"> <!-- Flex reverse so lowest sell price is at bottom closest to spread -->
+<!-- Simulated Data Rows -->
+<div class="relative grid grid-cols-3 px-4 py-0.5 text-xs font-mono hover:bg-[#293038] cursor-pointer group">
+<span class="text-[#ff4d4d]">2035.20</span>
+<span class="text-slate-300 dark:text-gray-300 text-right">0.50</span>
+<span class="text-slate-400 dark:text-gray-500 text-right">45.2K</span>
+<div class="absolute inset-y-0 right-0 bg-[#ff4d4d]/10 w-[20%] pointer-events-none"></div>
+</div>
+<div class="relative grid grid-cols-3 px-4 py-0.5 text-xs font-mono hover:bg-[#293038] cursor-pointer group">
+<span class="text-[#ff4d4d]">2035.10</span>
+<span class="text-slate-300 dark:text-gray-300 text-right">1.25</span>
+<span class="text-slate-400 dark:text-gray-500 text-right">42.1K</span>
+<div class="absolute inset-y-0 right-0 bg-[#ff4d4d]/10 w-[40%] pointer-events-none"></div>
+</div>
+<div class="relative grid grid-cols-3 px-4 py-0.5 text-xs font-mono hover:bg-[#293038] cursor-pointer group">
+<span class="text-[#ff4d4d]">2035.00</span>
+<span class="text-slate-300 dark:text-gray-300 text-right">5.00</span>
+<span class="text-slate-400 dark:text-gray-500 text-right">38.5K</span>
+<div class="absolute inset-y-0 right-0 bg-[#ff4d4d]/10 w-[65%] pointer-events-none"></div>
+</div>
+<div class="relative grid grid-cols-3 px-4 py-0.5 text-xs font-mono hover:bg-[#293038] cursor-pointer group">
+<span class="text-[#ff4d4d]">2034.90</span>
+<span class="text-slate-300 dark:text-gray-300 text-right">12.4</span>
+<span class="text-slate-400 dark:text-gray-500 text-right">25.0K</span>
+<div class="absolute inset-y-0 right-0 bg-[#ff4d4d]/10 w-[80%] pointer-events-none"></div>
+</div>
+</div>
+<!-- Spread Indicator -->
+<div class="py-2 px-4 my-1 bg-gray-100 dark:bg-[#1c252e] flex justify-between items-center border-y border-gray-200 dark:border-[#293038]">
+<span class="text-lg font-bold text-[#0bda5b] tracking-tight">2034.50</span>
+<span class="text-xs text-slate-500 dark:text-gray-400 flex items-center gap-1">
+                                Spread: <span class="text-white font-mono">0.40</span>
+</span>
+</div>
+<!-- Order Book List (Bids - Buying - Green) -->
+<div class="flex flex-col">
+<div class="relative grid grid-cols-3 px-4 py-0.5 text-xs font-mono hover:bg-[#293038] cursor-pointer group">
+<span class="text-[#0bda5b]">2034.50</span>
+<span class="text-slate-300 dark:text-gray-300 text-right">8.50</span>
+<span class="text-slate-400 dark:text-gray-500 text-right">12.4K</span>
+<div class="absolute inset-y-0 right-0 bg-[#0bda5b]/10 w-[70%] pointer-events-none"></div>
+</div>
+<div class="relative grid grid-cols-3 px-4 py-0.5 text-xs font-mono hover:bg-[#293038] cursor-pointer group">
+<span class="text-[#0bda5b]">2034.40</span>
+<span class="text-slate-300 dark:text-gray-300 text-right">10.2</span>
+<span class="text-slate-400 dark:text-gray-500 text-right">35.2K</span>
+<div class="absolute inset-y-0 right-0 bg-[#0bda5b]/10 w-[50%] pointer-events-none"></div>
+</div>
+<div class="relative grid grid-cols-3 px-4 py-0.5 text-xs font-mono hover:bg-[#293038] cursor-pointer group">
+<span class="text-[#0bda5b]">2034.30</span>
+<span class="text-slate-300 dark:text-gray-300 text-right">4.15</span>
+<span class="text-slate-400 dark:text-gray-500 text-right">48.1K</span>
+<div class="absolute inset-y-0 right-0 bg-[#0bda5b]/10 w-[30%] pointer-events-none"></div>
+</div>
+<div class="relative grid grid-cols-3 px-4 py-0.5 text-xs font-mono hover:bg-[#293038] cursor-pointer group">
+<span class="text-[#0bda5b]">2034.20</span>
+<span class="text-slate-300 dark:text-gray-300 text-right">2.10</span>
+<span class="text-slate-400 dark:text-gray-500 text-right">52.4K</span>
+<div class="absolute inset-y-0 right-0 bg-[#0bda5b]/10 w-[15%] pointer-events-none"></div>
+</div>
+<div class="relative grid grid-cols-3 px-4 py-0.5 text-xs font-mono hover:bg-[#293038] cursor-pointer group">
+<span class="text-[#0bda5b]">2034.10</span>
+<span class="text-slate-300 dark:text-gray-300 text-right">15.0</span>
+<span class="text-slate-400 dark:text-gray-500 text-right">60.2K</span>
+<div class="absolute inset-y-0 right-0 bg-[#0bda5b]/10 w-[5%] pointer-events-none"></div>
+</div>
+</div>
+</div>
+<!-- Key Statistics (Bottom of Sidebar) -->
+<div class="border-t border-gray-200 dark:border-[#293038] p-4 bg-gray-50 dark:bg-[#131b24]">
+<h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-primary">equalizer</span>
+                            Market Stats (24h)
+                        </h3>
+<div class="grid grid-cols-2 gap-y-3 gap-x-2">
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 dark:text-gray-500 uppercase">High</span>
+<span class="text-sm font-mono font-medium text-slate-900 dark:text-white">2,048.20</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 dark:text-gray-500 uppercase">Low</span>
+<span class="text-sm font-mono font-medium text-slate-900 dark:text-white">2,015.50</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 dark:text-gray-500 uppercase">Volume (XAU)</span>
+<span class="text-sm font-mono font-medium text-slate-900 dark:text-white">145.2K</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-500 dark:text-gray-500 uppercase">Volume (USD)</span>
+<span class="text-sm font-mono font-medium text-slate-900 dark:text-white">295.4M</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
