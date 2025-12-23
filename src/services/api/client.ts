@@ -39,8 +39,8 @@ const errorInterceptor = (error: unknown) => {
     if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as { response?: { status: number; data: unknown } };
         console.error('API Error:', axiosError.response?.status, axiosError.response?.data);
-    } else if (error && typeof error === 'object' && 'request' in error) {
-        const requestError = error as { message: string };
+    } else if (error && typeof error === 'object' && 'request' in error && 'message' in error) {
+        const requestError = error as unknown as { message: string };
         console.error('Network Error:', requestError.message);
     } else {
         const genericError = error as { message?: string };

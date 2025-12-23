@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown } from 'react-icons/fi';
+import { FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import type { Commodity } from '@/types';
 import { formatCurrency, formatPercent } from '@/utils/formatters';
 import styles from './CommodityCard.module.css';
@@ -52,7 +52,7 @@ export const CommodityCard: React.FC<CommodityCardProps> = ({
             </div>
 
             <div className={`${styles.change} ${isPositive ? styles.positive : styles.negative}`}>
-                {isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                {isPositive ? <FiTrendingUp size={16} /> : <FiTrendingDown size={16} />}
                 <span>{formatPercent(commodity.changePercent)}</span>
                 <span className={styles.changeAmount}>
                     ({formatCurrency(Math.abs(commodity.change), commodity.currency)})
