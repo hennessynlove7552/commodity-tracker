@@ -35,16 +35,16 @@ export const finnhubClient = axios.create({
 });
 
 // Error handling interceptor
-const errorInterceptor = (error: any) => {
-    if (error.response) {
-        // Server responded with error status
-        console.error('API Error:', error.response.status, error.response.data);
-    } else if (error.request) {
-        // Request made but no response
-        console.error('Network Error:', error.message);
+const errorInterceptor = (error: unknown) => {
+    if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status: number; data: unknown } };
+        console.error('API Error:', axiosError.response?.status, axiosError.response?.data);
+    } else if (error && typeof error === 'object' && 'request' in error) {
+        const requestError = error as { message: string };
+        console.error('Network Error:', requestError.message);
     } else {
-        // Something else happened
-        console.error('Error:', error.message);
+        const genericError = error as { message?: string };
+        console.error('Error:', genericError.message || 'Unknown error');
     }
     return Promise.reject(error);
 };

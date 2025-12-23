@@ -1,12 +1,26 @@
-import { twelveDataClient } from './client';
+// import { twelveDataClient } from './client';
 import { Commodity } from '@/types';
 import { MOCK_COMMODITIES } from '@/utils/constants';
+
+interface PriceData {
+    price: number;
+    symbol: string;
+}
+
+interface PriceHistoryPoint {
+    timestamp: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number;
+}
 
 /**
  * Fetch commodity price data
  * For MVP, we'll use mock data. In production, this would call the real API.
  */
-export const fetchCommodityPrice = async (symbol: string): Promise<any> => {
+export const fetchCommodityPrice = async (symbol: string): Promise<PriceData> => {
     try {
         // Uncomment for real API calls
         // const { data } = await twelveDataClient.get('/price', {
@@ -75,7 +89,7 @@ export const fetchCommodityDetails = async (id: string): Promise<Commodity> => {
 export const fetchPriceHistory = async (
     symbol: string,
     timeframe: string = '1M'
-): Promise<any[]> => {
+): Promise<PriceHistoryPoint[]> => {
     try {
         await new Promise((resolve) => setTimeout(resolve, 600));
 

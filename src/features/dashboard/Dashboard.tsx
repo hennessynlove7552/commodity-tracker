@@ -3,7 +3,6 @@ import { useCommodities } from '@/hooks/useCommodities';
 import { useWatchlistStore } from '@/store/watchlistStore';
 import { CommodityGrid } from '@/components/commodity/CommodityGrid';
 import { Loading } from '@/components/common/Loading';
-import { CommodityCategory } from '@/types';
 import { CATEGORY_LABELS } from '@/utils/constants';
 import styles from './Dashboard.module.css';
 
