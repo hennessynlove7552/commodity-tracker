@@ -4,6 +4,7 @@ export enum CommodityCategory {
     ENERGY = 'ENERGY',
     AGRICULTURE = 'AGRICULTURE',
     INDUSTRIAL_METALS = 'INDUSTRIAL_METALS',
+    RARE_METALS = 'RARE_METALS', // 희토류/희소금속
 }
 
 export interface Commodity {
