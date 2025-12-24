@@ -4,28 +4,59 @@ import { useWatchlistStore } from '@/store/watchlistStore';
 import { CommodityGrid } from '@/components/commodity/CommodityGrid';
 import { Loading } from '@/components/common/Loading';
 import { CATEGORY_LABELS } from '@/utils/constants';
+import { PreciousMetalsSubcategory, IndustrialMetalsSubcategory } from '@/types';
 import styles from './Dashboard.module.css';
+
+// Subcategory labels
+const SUBCATEGORY_LABELS = {
+    // Precious Metals
+    [PreciousMetalsSubcategory.CORE]: '핵심 귀금속',
+    [PreciousMetalsSubcategory.PGM_SPECIALTY]: 'PGM/특수',
+    // Industrial Metals
+    [IndustrialMetalsSubcategory.BASE_METALS]: '전통 산업금속',
+    [IndustrialMetalsSubcategory.FERROUS]: '철강·철계',
+    [IndustrialMetalsSubcategory.BATTERY_ENERGY]: '배터리·에너지',
+    [IndustrialMetalsSubcategory.RARE_STRATEGIC]: '희소·전략',
+};
 
 export const Dashboard: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+    const [selectedSubcategory, setSelectedSubcategory] = useState<string>('ALL');
     const [searchQuery, setSearchQuery] = useState('');
 
     const { data: commodities, isLoading, error } = useCommodities();
     const { watchlist, toggleWatchlist } = useWatchlistStore();
 
-    // Filter commodities based on category and search query
+    // Get available subcategories for selected category
+    const availableSubcategories = useMemo(() => {
+        if (!commodities || selectedCategory === 'ALL') return [];
+
+        const subcats = new Set<string>();
+        commodities
+            .filter(c => c.category === selectedCategory)
+            .forEach(c => {
+                if (c.subcategory) {
+                    subcats.add(c.subcategory);
+                }
+            });
+
+        return Array.from(subcats);
+    }, [commodities, selectedCategory]);
+
+    // Filter commodities based on category, subcategory and search query
     const filteredCommodities = useMemo(() => {
         if (!commodities) return [];
 
         return commodities.filter((commodity) => {
             const matchesCategory = selectedCategory === 'ALL' || commodity.category === selectedCategory;
+            const matchesSubcategory = selectedSubcategory === 'ALL' || commodity.subcategory === selectedSubcategory;
             const matchesSearch =
                 commodity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 commodity.nameKo.includes(searchQuery) ||
                 commodity.symbol.toLowerCase().includes(searchQuery.toLowerCase());
-            return matchesCategory && matchesSearch;
+            return matchesCategory && matchesSubcategory && matchesSearch;
         });
-    }, [commodities, selectedCategory, searchQuery]);
+    }, [commodities, selectedCategory, selectedSubcategory, searchQuery]);
 
     // Sort: watchlist items first, then by change percent
     const sortedCommodities = useMemo(() => {
@@ -50,6 +81,12 @@ export const Dashboard: React.FC = () => {
             losers: commodities.filter((c) => c.changePercent < 0).length,
         };
     }, [commodities]);
+
+    // Reset subcategory when category changes
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category);
+        setSelectedSubcategory('ALL');
+    };
 
     if (isLoading) {
         return <Loading text="원자재 데이터를 불러오는 중..." />;
@@ -114,10 +151,11 @@ export const Dashboard: React.FC = () => {
                         />
                     </div>
 
+                    {/* Main Category Filters */}
                     <div className={styles.filters}>
                         <button
                             className={`${styles.filterBtn} ${selectedCategory === 'ALL' ? styles.active : ''}`}
-                            onClick={() => setSelectedCategory('ALL')}
+                            onClick={() => handleCategoryChange('ALL')}
                         >
                             전체
                         </button>
@@ -125,12 +163,44 @@ export const Dashboard: React.FC = () => {
                             <button
                                 key={key}
                                 className={`${styles.filterBtn} ${selectedCategory === key ? styles.active : ''}`}
-                                onClick={() => setSelectedCategory(key)}
+                                onClick={() => handleCategoryChange(key)}
                             >
                                 {label}
                             </button>
                         ))}
                     </div>
+
+                    {/* Subcategory Filters */}
+                    {availableSubcategories.length > 0 && (
+                        <div className={styles.subFilters}>
+                            <span className={styles.subFilterLabel}>세부 분류:</span>
+                            <button
+                                className={`${styles.subFilterBtn} ${selectedSubcategory === 'ALL' ? styles.active : ''}`}
+                                onClick={() => setSelectedSubcategory('ALL')}
+                            >
+                                전체
+                            </button>
+                            {availableSubcategories.map((subcat) => (
+                                <button
+                                    key={subcat}
+                                    className={`${styles.subFilterBtn} ${selectedSubcategory === subcat ? styles.active : ''}`}
+                                    onClick={() => setSelectedSubcategory(subcat)}
+                                >
+                                    {SUBCATEGORY_LABELS[subcat as keyof typeof SUBCATEGORY_LABELS] || subcat}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Results count */}
+                <div className={styles.resultsInfo}>
+                    <span>{filteredCommodities.length}개의 원자재</span>
+                    {selectedSubcategory !== 'ALL' && (
+                        <span className={styles.activeFilter}>
+                            {' · '}{SUBCATEGORY_LABELS[selectedSubcategory as keyof typeof SUBCATEGORY_LABELS]}
+                        </span>
+                    )}
                 </div>
 
                 {/* Commodity Grid */}
