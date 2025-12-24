@@ -2,9 +2,10 @@ import { useState, useMemo } from 'react';
 import { useCommodities } from '@/hooks/useCommodities';
 import { useWatchlistStore } from '@/store/watchlistStore';
 import { CommodityGrid } from '@/components/commodity/CommodityGrid';
+import { CommodityDetailModal } from '@/components/commodity/CommodityDetailModal';
 import { Loading } from '@/components/common/Loading';
 import { CATEGORY_LABELS } from '@/utils/constants';
-import { PreciousMetalsSubcategory, EnergySubcategory, IndustrialMetalsSubcategory, AgriculturalSubcategory } from '@/types';
+import { PreciousMetalsSubcategory, EnergySubcategory, IndustrialMetalsSubcategory, AgriculturalSubcategory, Commodity } from '@/types';
 import styles from './Dashboard.module.css';
 
 // Subcategory labels
@@ -37,6 +38,7 @@ export const Dashboard: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
     const [selectedSubcategory, setSelectedSubcategory] = useState<string>('ALL');
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCommodity, setSelectedCommodity] = useState<Commodity | null>(null);
 
     const { data: commodities, isLoading, error } = useCommodities();
     const { watchlist, toggleWatchlist } = useWatchlistStore();
@@ -71,19 +73,6 @@ export const Dashboard: React.FC = () => {
             return matchesCategory && matchesSubcategory && matchesSearch;
         });
     }, [commodities, selectedCategory, selectedSubcategory, searchQuery]);
-
-    // Sort: watchlist items first, then by change percent
-    const sortedCommodities = useMemo(() => {
-        return [...filteredCommodities].sort((a, b) => {
-            const aInWatchlist = watchlist.includes(a.id);
-            const bInWatchlist = watchlist.includes(b.id);
-
-            if (aInWatchlist && !bInWatchlist) return -1;
-            if (!aInWatchlist && bInWatchlist) return 1;
-
-            return Math.abs(b.changePercent) - Math.abs(a.changePercent);
-        });
-    }, [filteredCommodities, watchlist]);
 
     // Calculate stats
     const stats = useMemo(() => {
@@ -219,10 +208,21 @@ export const Dashboard: React.FC = () => {
 
                 {/* Commodity Grid */}
                 <CommodityGrid
-                    commodities={sortedCommodities}
+                    commodities={filteredCommodities}
                     watchlist={watchlist}
                     onToggleWatchlist={toggleWatchlist}
+                    onClick={(id: string) => {
+                        const commodity = filteredCommodities.find(c => c.id === id);
+                        if (commodity) setSelectedCommodity(commodity);
+                    }}
                 />
+
+                {selectedCommodity && (
+                    <CommodityDetailModal
+                        commodity={selectedCommodity}
+                        onClose={() => setSelectedCommodity(null)}
+                    />
+                )}
             </div>
         </div>
     );

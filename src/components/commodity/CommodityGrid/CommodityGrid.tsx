@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { Commodity } from '@/types';
 import { CommodityCard } from '../CommodityCard';
 import styles from './CommodityGrid.module.css';
@@ -8,17 +7,19 @@ interface CommodityGridProps {
     commodities: Commodity[];
     watchlist: string[];
     onToggleWatchlist: (id: string) => void;
+    onClick?: (id: string) => void;
 }
 
 export const CommodityGrid = memo<CommodityGridProps>(({
     commodities,
     watchlist,
-    onToggleWatchlist
+    onToggleWatchlist,
+    onClick
 }) => {
-    const navigate = useNavigate();
-
     const handleCardClick = (id: string) => {
-        navigate(`/commodity/${id}`);
+        if (onClick) {
+            onClick(id);
+        }
     };
 
     if (commodities.length === 0) {

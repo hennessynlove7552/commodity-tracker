@@ -4,14 +4,15 @@
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: var(--spacing-md);
-    transition: all var(--transition-base);
+    transition: all var(--transition-normal);
+    animation: fadeInUp var(--transition-normal);
     cursor: pointer;
 }
 
 .card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--color-secondary);
+    border-color: var(--color-primary);
+    box-shadow: 0 8px 24px rgba(6, 182, 212, 0.2);
 }
 
 .header {
