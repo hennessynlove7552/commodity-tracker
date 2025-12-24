@@ -1,4 +1,4 @@
-import { Commodity, CommodityCategory, PreciousMetalsSubcategory, IndustrialMetalsSubcategory, AgriculturalSubcategory } from '@/types';
+import { Commodity, CommodityCategory, PreciousMetalsSubcategory, EnergySubcategory, IndustrialMetalsSubcategory, AgriculturalSubcategory } from '@/types';
 
 /**
  * Mock commodity data for development
@@ -47,13 +47,14 @@ export const MOCK_COMMODITIES: Commodity[] = [
         lastUpdated: new Date(),
         icon: '⚪',
     },
-    // Energy
+    // Energy - Crude Oil (원유)
     {
         id: '4',
         symbol: 'CL=F',
         name: 'Crude Oil WTI',
         nameKo: 'WTI 원유',
         category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.CRUDE_OIL,
         currentPrice: 78.45,
         currency: 'USD',
         change: 2.15,
@@ -67,6 +68,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         name: 'Brent Crude',
         nameKo: '브렌트유',
         category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.CRUDE_OIL,
         currentPrice: 82.30,
         currency: 'USD',
         change: 1.85,
@@ -74,12 +76,14 @@ export const MOCK_COMMODITIES: Commodity[] = [
         lastUpdated: new Date(),
         icon: '⛽',
     },
+    // Energy - Gas (가스 에너지)
     {
         id: '6',
         symbol: 'NG=F',
         name: 'Natural Gas',
         nameKo: '천연가스',
         category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
         currentPrice: 2.85,
         currency: 'USD',
         change: -0.12,
@@ -87,9 +91,149 @@ export const MOCK_COMMODITIES: Commodity[] = [
         lastUpdated: new Date(),
         icon: '🔥',
     },
-    // Agriculture - Grains (곡물)
     {
         id: '7',
+        symbol: 'HH',
+        name: 'Henry Hub',
+        nameKo: '헨리허브 천연가스',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 2.92,
+        currency: 'USD',
+        change: 0.08,
+        changePercent: 2.82,
+        lastUpdated: new Date(),
+        icon: '🔥',
+    },
+    {
+        id: '18',
+        symbol: 'TTF',
+        name: 'TTF (Title Transfer Facility)',
+        nameKo: '유럽 TTF 가스',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 35.50,
+        currency: 'USD',
+        change: 1.25,
+        changePercent: 3.65,
+        lastUpdated: new Date(),
+        icon: '🔥',
+    },
+    {
+        id: '19',
+        symbol: 'NBP',
+        name: 'NBP (National Balancing Point)',
+        nameKo: '영국 NBP 가스',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 34.75,
+        currency: 'USD',
+        change: -0.85,
+        changePercent: -2.39,
+        lastUpdated: new Date(),
+        icon: '🔥',
+    },
+    {
+        id: '20',
+        symbol: 'LNG',
+        name: 'LNG',
+        nameKo: '액화천연가스',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 15.50,
+        currency: 'USD',
+        change: 0.75,
+        changePercent: 5.08,
+        lastUpdated: new Date(),
+        icon: '❄️',
+    },
+    {
+        id: '21',
+        symbol: 'LNG_SPOT',
+        name: 'LNG Spot',
+        nameKo: 'LNG 현물',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 16.25,
+        currency: 'USD',
+        change: 1.15,
+        changePercent: 7.61,
+        lastUpdated: new Date(),
+        icon: '❄️',
+    },
+    {
+        id: '22',
+        symbol: 'LNG_LT',
+        name: 'LNG Long-term Contract',
+        nameKo: 'LNG 장기계약 가격',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 14.80,
+        currency: 'USD',
+        change: -0.25,
+        changePercent: -1.66,
+        lastUpdated: new Date(),
+        icon: '❄️',
+    },
+    {
+        id: '23',
+        symbol: 'JKM',
+        name: 'JKM (Japan Korea Marker)',
+        nameKo: 'JKM (한·일 LNG 기준가)',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 15.95,
+        currency: 'USD',
+        change: 0.95,
+        changePercent: 6.33,
+        lastUpdated: new Date(),
+        icon: '❄️',
+    },
+    {
+        id: '24',
+        symbol: 'LPG',
+        name: 'LPG',
+        nameKo: '액화석유가스',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 625.00,
+        currency: 'USD',
+        change: 12.50,
+        changePercent: 2.04,
+        lastUpdated: new Date(),
+        icon: '⛽',
+    },
+    {
+        id: '25',
+        symbol: 'PROPANE',
+        name: 'Propane',
+        nameKo: '프로판',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 0.85,
+        currency: 'USD',
+        change: 0.02,
+        changePercent: 2.41,
+        lastUpdated: new Date(),
+        icon: '⛽',
+    },
+    {
+        id: '26',
+        symbol: 'BUTANE',
+        name: 'Butane',
+        nameKo: '부탄',
+        category: CommodityCategory.ENERGY,
+        subcategory: EnergySubcategory.GAS,
+        currentPrice: 0.92,
+        currency: 'USD',
+        change: -0.03,
+        changePercent: -3.16,
+        lastUpdated: new Date(),
+        icon: '⛽',
+    },
+    // Agriculture - Grains (곡물)
+    {
+        id: '27',
         symbol: 'ZC=F',
         name: 'Corn',
         nameKo: '옥수수',
@@ -244,7 +388,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🌻',
     },
     {
-        id: '18',
+        id: '28',
         symbol: 'PALM',
         name: 'Palm Oil',
         nameKo: '팜유',
@@ -259,7 +403,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Agriculture - Soft Commodities (가공 식품/기호 농산물)
     {
-        id: '19',
+        id: '29',
         symbol: 'KC=F',
         name: 'Coffee',
         nameKo: '커피',
@@ -273,7 +417,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '☕',
     },
     {
-        id: '20',
+        id: '30',
         symbol: 'SB=F',
         name: 'Sugar',
         nameKo: '설탕',
@@ -287,7 +431,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🍬',
     },
     {
-        id: '21',
+        id: '31',
         symbol: 'CC=F',
         name: 'Cocoa',
         nameKo: '코코아',
@@ -301,7 +445,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🍫',
     },
     {
-        id: '22',
+        id: '32',
         symbol: 'OJ=F',
         name: 'Orange Juice',
         nameKo: '오렌지 주스',
@@ -315,7 +459,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🍊',
     },
     {
-        id: '23',
+        id: '33',
         symbol: 'CT=F',
         name: 'Cotton',
         nameKo: '면화',
@@ -330,7 +474,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Agriculture - Livestock (축산물)
     {
-        id: '24',
+        id: '34',
         symbol: 'LE=F',
         name: 'Live Cattle',
         nameKo: '생우',
@@ -344,7 +488,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🐄',
     },
     {
-        id: '25',
+        id: '35',
         symbol: 'GF=F',
         name: 'Feeder Cattle',
         nameKo: '사육우',
@@ -358,7 +502,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🐄',
     },
     {
-        id: '26',
+        id: '36',
         symbol: 'HE=F',
         name: 'Lean Hogs',
         nameKo: '돼지',
@@ -373,7 +517,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Agriculture - Dairy (유제품)
     {
-        id: '27',
+        id: '37',
         symbol: 'DC=F',
         name: 'Milk',
         nameKo: '우유',
@@ -387,7 +531,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🥛',
     },
     {
-        id: '28',
+        id: '38',
         symbol: 'CSC=F',
         name: 'Cheese',
         nameKo: '치즈',
@@ -401,7 +545,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🧀',
     },
     {
-        id: '29',
+        id: '39',
         symbol: 'CB=F',
         name: 'Butter',
         nameKo: '버터',
@@ -416,7 +560,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Agriculture - Other Specialty Crops (기타 특수 농산물)
     {
-        id: '30',
+        id: '40',
         symbol: 'ADZUKI',
         name: 'Adzuki Beans',
         nameKo: '팥',
@@ -430,7 +574,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🫘',
     },
     {
-        id: '31',
+        id: '41',
         symbol: 'PEANUTS',
         name: 'Peanuts',
         nameKo: '땅콩',
@@ -444,7 +588,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🥜',
     },
     {
-        id: '32',
+        id: '42',
         symbol: 'ALMONDS',
         name: 'Almonds',
         nameKo: '아몬드',
@@ -458,7 +602,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🌰',
     },
     {
-        id: '33',
+        id: '43',
         symbol: 'CASHEWS',
         name: 'Cashews',
         nameKo: '캐슈넛',
@@ -472,7 +616,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🌰',
     },
     {
-        id: '34',
+        id: '44',
         symbol: 'WALNUTS',
         name: 'Walnuts',
         nameKo: '호두',
@@ -487,7 +631,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Industrial Metals - Base Metals (전통 산업금속)
     {
-        id: '35',
+        id: '45',
         symbol: 'HG=F',
         name: 'Copper',
         nameKo: '구리',
@@ -501,7 +645,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🔶',
     },
     {
-        id: '36',
+        id: '46',
         symbol: 'ALI=F',
         name: 'Aluminum',
         nameKo: '알루미늄',
@@ -515,7 +659,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '⚙️',
     },
     {
-        id: '37',
+        id: '47',
         symbol: 'NI=F',
         name: 'Nickel',
         nameKo: '니켈',
@@ -530,7 +674,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Industrial Metals - Rare & Strategic Metals (희소·전략 금속)
     {
-        id: '38',
+        id: '48',
         symbol: 'MOLY',
         name: 'Molybdenum',
         nameKo: '몰리브덴',
@@ -544,7 +688,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '⚛️',
     },
     {
-        id: '39',
+        id: '49',
         symbol: 'TUNGSTEN',
         name: 'Tungsten',
         nameKo: '텅스텐',
@@ -558,7 +702,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '⚛️',
     },
     {
-        id: '40',
+        id: '50',
         symbol: 'VANADIUM',
         name: 'Vanadium',
         nameKo: '바나듐',
@@ -572,7 +716,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '⚛️',
     },
     {
-        id: '41',
+        id: '51',
         symbol: 'ANTIMONY',
         name: 'Antimony',
         nameKo: '안티모니',
@@ -586,7 +730,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '⚛️',
     },
     {
-        id: '42',
+        id: '52',
         symbol: 'BISMUTH',
         name: 'Bismuth',
         nameKo: '비스무트',
@@ -601,7 +745,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Industrial Metals - Rare Earth Elements (희토류)
     {
-        id: '43',
+        id: '53',
         symbol: 'ND',
         name: 'Neodymium',
         nameKo: '네오디뮴',
@@ -615,7 +759,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🔬',
     },
     {
-        id: '44',
+        id: '54',
         symbol: 'PR',
         name: 'Praseodymium',
         nameKo: '프라세오디뮴',
@@ -629,7 +773,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🔬',
     },
     {
-        id: '45',
+        id: '55',
         symbol: 'DY',
         name: 'Dysprosium',
         nameKo: '디스프로슘',
@@ -643,7 +787,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🔬',
     },
     {
-        id: '46',
+        id: '56',
         symbol: 'TB',
         name: 'Terbium',
         nameKo: '테르븀',
@@ -657,7 +801,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🔬',
     },
     {
-        id: '47',
+        id: '57',
         symbol: 'LA',
         name: 'Lanthanum',
         nameKo: '란타넘',
@@ -671,7 +815,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🔬',
     },
     {
-        id: '48',
+        id: '58',
         symbol: 'CE',
         name: 'Cerium',
         nameKo: '세륨',

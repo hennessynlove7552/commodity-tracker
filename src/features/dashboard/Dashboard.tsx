@@ -4,7 +4,7 @@ import { useWatchlistStore } from '@/store/watchlistStore';
 import { CommodityGrid } from '@/components/commodity/CommodityGrid';
 import { Loading } from '@/components/common/Loading';
 import { CATEGORY_LABELS } from '@/utils/constants';
-import { PreciousMetalsSubcategory, IndustrialMetalsSubcategory } from '@/types';
+import { PreciousMetalsSubcategory, EnergySubcategory, IndustrialMetalsSubcategory, AgriculturalSubcategory } from '@/types';
 import styles from './Dashboard.module.css';
 
 // Subcategory labels
@@ -12,11 +12,25 @@ const SUBCATEGORY_LABELS = {
     // Precious Metals
     [PreciousMetalsSubcategory.CORE]: '핵심 귀금속',
     [PreciousMetalsSubcategory.PGM_SPECIALTY]: 'PGM/특수',
+    // Energy
+    [EnergySubcategory.CRUDE_OIL]: '원유',
+    [EnergySubcategory.REFINED_PRODUCTS]: '정제유/석유제품',
+    [EnergySubcategory.GAS]: '가스 에너지',
+    [EnergySubcategory.COAL]: '석탄',
+    [EnergySubcategory.ELECTRICITY]: '전력',
+    [EnergySubcategory.RENEWABLE]: '신재생 에너지',
     // Industrial Metals
     [IndustrialMetalsSubcategory.BASE_METALS]: '전통 산업금속',
     [IndustrialMetalsSubcategory.FERROUS]: '철강·철계',
     [IndustrialMetalsSubcategory.BATTERY_ENERGY]: '배터리·에너지',
     [IndustrialMetalsSubcategory.RARE_STRATEGIC]: '희소·전략',
+    // Agricultural
+    [AgriculturalSubcategory.GRAINS]: '곡물',
+    [AgriculturalSubcategory.OILSEEDS]: '유지종자/오일',
+    [AgriculturalSubcategory.SOFT_COMMODITIES]: '소프트 커머디티',
+    [AgriculturalSubcategory.LIVESTOCK]: '축산물',
+    [AgriculturalSubcategory.DAIRY]: '유제품',
+    [AgriculturalSubcategory.SPECIALTY]: '특수 농산물',
 };
 
 export const Dashboard: React.FC = () => {
