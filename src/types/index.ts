@@ -4,7 +4,19 @@ export enum CommodityCategory {
     ENERGY = 'ENERGY',
     AGRICULTURE = 'AGRICULTURE',
     INDUSTRIAL_METALS = 'INDUSTRIAL_METALS',
-    RARE_METALS = 'RARE_METALS', // 희토류/희소금속
+}
+
+// Subcategories for detailed classification
+export enum PreciousMetalsSubcategory {
+    CORE = 'CORE', // 핵심 귀금속
+    PGM_SPECIALTY = 'PGM_SPECIALTY', // PGM / 특수 귀금속
+}
+
+export enum IndustrialMetalsSubcategory {
+    BASE_METALS = 'BASE_METALS', // 전통 산업금속
+    FERROUS = 'FERROUS', // 철강·철계 금속
+    BATTERY_ENERGY = 'BATTERY_ENERGY', // 배터리·에너지 전환 금속
+    RARE_STRATEGIC = 'RARE_STRATEGIC', // 희소·전략 금속
 }
 
 export interface Commodity {
@@ -13,6 +25,7 @@ export interface Commodity {
     name: string;
     nameKo: string;
     category: CommodityCategory;
+    subcategory?: PreciousMetalsSubcategory | IndustrialMetalsSubcategory; // 세부 카테고리
     currentPrice: number;
     currency: string;
     change: number;

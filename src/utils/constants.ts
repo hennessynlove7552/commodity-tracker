@@ -1,16 +1,17 @@
-import { Commodity, CommodityCategory } from '@/types';
+import { Commodity, CommodityCategory, PreciousMetalsSubcategory, IndustrialMetalsSubcategory } from '@/types';
 
 /**
  * Mock commodity data for development
  */
 export const MOCK_COMMODITIES: Commodity[] = [
-    // Precious Metals
+    // Precious Metals - Core (핵심 귀금속)
     {
         id: '1',
         symbol: 'XAUUSD',
         name: 'Gold',
         nameKo: '금',
         category: CommodityCategory.PRECIOUS_METALS,
+        subcategory: PreciousMetalsSubcategory.CORE,
         currentPrice: 2050.50,
         currency: 'USD',
         change: 15.25,
@@ -24,6 +25,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         name: 'Silver',
         nameKo: '은',
         category: CommodityCategory.PRECIOUS_METALS,
+        subcategory: PreciousMetalsSubcategory.CORE,
         currentPrice: 24.85,
         currency: 'USD',
         change: -0.35,
@@ -37,6 +39,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         name: 'Platinum',
         nameKo: '백금',
         category: CommodityCategory.PRECIOUS_METALS,
+        subcategory: PreciousMetalsSubcategory.PGM_SPECIALTY,
         currentPrice: 925.30,
         currency: 'USD',
         change: 8.50,
@@ -454,13 +457,14 @@ export const MOCK_COMMODITIES: Commodity[] = [
         lastUpdated: new Date(),
         icon: '🌰',
     },
-    // Industrial Metals
+    // Industrial Metals - Base Metals (전통 산업금속)
     {
         id: '35',
         symbol: 'HG=F',
         name: 'Copper',
         nameKo: '구리',
         category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.BASE_METALS,
         currentPrice: 3.85,
         currency: 'USD',
         change: 0.05,
@@ -474,6 +478,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         name: 'Aluminum',
         nameKo: '알루미늄',
         category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.BASE_METALS,
         currentPrice: 2245.00,
         currency: 'USD',
         change: -15.50,
@@ -487,6 +492,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         name: 'Nickel',
         nameKo: '니켈',
         category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.BATTERY_ENERGY,
         currentPrice: 16850.00,
         currency: 'USD',
         change: 125.00,
@@ -494,13 +500,14 @@ export const MOCK_COMMODITIES: Commodity[] = [
         lastUpdated: new Date(),
         icon: '🔩',
     },
-    // Rare Metals - Specialty Metals (희소금속)
+    // Industrial Metals - Rare & Strategic Metals (희소·전략 금속)
     {
         id: '38',
         symbol: 'MOLY',
         name: 'Molybdenum',
         nameKo: '몰리브덴',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 45.50,
         currency: 'USD',
         change: 1.25,
@@ -513,7 +520,8 @@ export const MOCK_COMMODITIES: Commodity[] = [
         symbol: 'TUNGSTEN',
         name: 'Tungsten',
         nameKo: '텅스텐',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 285.00,
         currency: 'USD',
         change: -5.50,
@@ -526,7 +534,8 @@ export const MOCK_COMMODITIES: Commodity[] = [
         symbol: 'VANADIUM',
         name: 'Vanadium',
         nameKo: '바나듐',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 28.75,
         currency: 'USD',
         change: 0.85,
@@ -539,7 +548,8 @@ export const MOCK_COMMODITIES: Commodity[] = [
         symbol: 'ANTIMONY',
         name: 'Antimony',
         nameKo: '안티모니',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 11.25,
         currency: 'USD',
         change: -0.35,
@@ -552,7 +562,8 @@ export const MOCK_COMMODITIES: Commodity[] = [
         symbol: 'BISMUTH',
         name: 'Bismuth',
         nameKo: '비스무트',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 8.95,
         currency: 'USD',
         change: 0.15,
@@ -560,13 +571,14 @@ export const MOCK_COMMODITIES: Commodity[] = [
         lastUpdated: new Date(),
         icon: '⚛️',
     },
-    // Rare Metals - Rare Earth Elements (희토류)
+    // Industrial Metals - Rare Earth Elements (희토류)
     {
         id: '43',
         symbol: 'ND',
         name: 'Neodymium',
         nameKo: '네오디뮴',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 125.50,
         currency: 'USD',
         change: 3.75,
@@ -579,7 +591,8 @@ export const MOCK_COMMODITIES: Commodity[] = [
         symbol: 'PR',
         name: 'Praseodymium',
         nameKo: '프라세오디뮴',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 115.25,
         currency: 'USD',
         change: 2.50,
@@ -592,7 +605,8 @@ export const MOCK_COMMODITIES: Commodity[] = [
         symbol: 'DY',
         name: 'Dysprosium',
         nameKo: '디스프로슘',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 385.00,
         currency: 'USD',
         change: -8.50,
@@ -605,7 +619,8 @@ export const MOCK_COMMODITIES: Commodity[] = [
         symbol: 'TB',
         name: 'Terbium',
         nameKo: '테르븀',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 1250.00,
         currency: 'USD',
         change: 25.00,
@@ -618,7 +633,8 @@ export const MOCK_COMMODITIES: Commodity[] = [
         symbol: 'LA',
         name: 'Lanthanum',
         nameKo: '란타넘',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 5.85,
         currency: 'USD',
         change: 0.12,
@@ -631,7 +647,8 @@ export const MOCK_COMMODITIES: Commodity[] = [
         symbol: 'CE',
         name: 'Cerium',
         nameKo: '세륨',
-        category: CommodityCategory.RARE_METALS,
+        category: CommodityCategory.INDUSTRIAL_METALS,
+        subcategory: IndustrialMetalsSubcategory.RARE_STRATEGIC,
         currentPrice: 4.25,
         currency: 'USD',
         change: -0.08,
@@ -649,7 +666,6 @@ export const CATEGORY_LABELS: Record<CommodityCategory, string> = {
     [CommodityCategory.ENERGY]: '에너지',
     [CommodityCategory.AGRICULTURE]: '농산물',
     [CommodityCategory.INDUSTRIAL_METALS]: '산업금속',
-    [CommodityCategory.RARE_METALS]: '희토류/희소금속',
 };
 
 /**
