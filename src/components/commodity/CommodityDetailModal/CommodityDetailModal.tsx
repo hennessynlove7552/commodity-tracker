@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, Line } from 'recharts';
 import { Commodity } from '@/types';
 import { formatCurrency, formatPercent } from '@/utils/formatters';
 import styles from './CommodityDetailModal.module.css';
@@ -10,6 +10,18 @@ interface CommodityDetailModalProps {
 }
 
 type TimeRange = '1D' | '1W' | '1M' | '3M' | '1Y' | 'ALL';
+
+interface ChartDataPoint {
+    date: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    fill: string;
+    ma5?: number | null;
+    ma20?: number | null;
+    ma60?: number | null;
+}
 
 export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ commodity, onClose }) => {
     const [timeRange, setTimeRange] = useState<TimeRange>('1M');
@@ -26,7 +38,7 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
         };
 
         const points = dataPoints[timeRange];
-        const data = [];
+        const data: ChartDataPoint[] = [];
         const basePrice = commodity.currentPrice;
         const volatility = basePrice * 0.02; // 2% daily volatility
 
@@ -71,6 +83,26 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                 fill: close >= open ? '#10b981' : '#ef4444', // green if up, red if down
             });
         }
+
+        // Calculate moving averages
+        const calculateMA = (period: number): (number | null)[] => {
+            return data.map((_, index) => {
+                if (index < period - 1) return null;
+                const sum = data.slice(index - period + 1, index + 1).reduce((acc, d) => acc + d.close, 0);
+                return Number((sum / period).toFixed(2));
+            });
+        };
+
+        const ma5 = calculateMA(5);
+        const ma20 = calculateMA(20);
+        const ma60 = calculateMA(60);
+
+        // Add MA values to data
+        data.forEach((d, i) => {
+            d.ma5 = ma5[i];
+            d.ma20 = ma20[i];
+            d.ma60 = ma60[i];
+        });
 
         return data;
     }, [commodity.currentPrice, commodity.id, timeRange]);
@@ -149,16 +181,23 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                 <div className={styles.chartSection}>
                     <div className={styles.chartHeader}>
                         <h3 className={styles.chartTitle}>가격 추이</h3>
-                        <div className={styles.timeRangeButtons}>
-                            {(['1D', '1W', '1M', '3M', '1Y', 'ALL'] as TimeRange[]).map((range) => (
-                                <button
-                                    key={range}
-                                    className={`${styles.timeRangeButton} ${timeRange === range ? styles.active : ''}`}
-                                    onClick={() => setTimeRange(range)}
-                                >
-                                    {range}
-                                </button>
-                            ))}
+                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                            <div className={styles.timeRangeButtons}>
+                                {(['1D', '1W', '1M', '3M', '1Y', 'ALL'] as TimeRange[]).map((range) => (
+                                    <button
+                                        key={range}
+                                        className={`${styles.timeRangeButton} ${timeRange === range ? styles.active : ''}`}
+                                        onClick={() => setTimeRange(range)}
+                                    >
+                                        {range}
+                                    </button>
+                                ))}
+                            </div>
+                            <div style={{ display: 'flex', gap: '12px', fontSize: '12px' }}>
+                                <span style={{ color: '#f59e0b' }}>━ MA5</span>
+                                <span style={{ color: '#3b82f6' }}>━ MA20</span>
+                                <span style={{ color: '#8b5cf6' }}>━ MA60</span>
+                            </div>
                         </div>
                     </div>
 
@@ -209,40 +248,56 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                                         return null;
                                     }}
                                 />
-                                {/* Candlestick wicks (high-low lines) */}
+                                {/* Candlestick chart */}
                                 <Bar
-                                    dataKey={(data: { low: number; high: number }) => [data.low, data.high]}
-                                    fill="#888"
-                                    barSize={1}
-                                />
-                                {/* Candlestick bodies (open-close rectangles) */}
-                                <Bar
-                                    dataKey={(data: { open: number; close: number }) => [Math.min(data.open, data.close), Math.max(data.open, data.close)]}
+                                    dataKey="close"
                                     fill="#06b6d4"
-                                    barSize={8}
                                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                     shape={(props: any) => {
-                                        const { x, y, width, height, payload } = props;
-                                        const isUp = payload.close >= payload.open;
+                                        const { x, width, payload } = props;
+                                        if (!payload || !payload.open || !payload.close) {
+                                            return <g />;
+                                        }
+
+                                        const { open, high, low, close } = payload;
+                                        const isUp = close >= open;
                                         const color = isUp ? '#10b981' : '#ef4444';
+
+                                        // Calculate Y-axis scale from the chart
+                                        const chartHeight = 400;
+                                        const yAxisDomain = [Math.min(low, open, close) - 5, Math.max(high, open, close) + 5];
+                                        const priceRange = yAxisDomain[1] - yAxisDomain[0];
+
+                                        const getY = (price: number) => {
+                                            return chartHeight - ((price - yAxisDomain[0]) / priceRange) * chartHeight;
+                                        };
+
+                                        const highY = getY(high);
+                                        const lowY = getY(low);
+                                        const openY = getY(open);
+                                        const closeY = getY(close);
+
+                                        const bodyTop = Math.min(openY, closeY);
+                                        const bodyHeight = Math.abs(openY - closeY) || 1;
+                                        const centerX = x + width / 2;
 
                                         return (
                                             <g>
-                                                {/* Wick (high-low line) - This calculation is problematic as explained above, but following instruction */}
+                                                {/* Wick (high-low line) */}
                                                 <line
-                                                    x1={x + width / 2}
-                                                    y1={y - (payload.high - Math.max(payload.open, payload.close)) * (height / (Math.abs(payload.open - payload.close) || 1))}
-                                                    x2={x + width / 2}
-                                                    y2={y + height + (Math.min(payload.open, payload.close) - payload.low) * (height / (Math.abs(payload.open - payload.close) || 1))}
+                                                    x1={centerX}
+                                                    y1={highY}
+                                                    x2={centerX}
+                                                    y2={lowY}
                                                     stroke={color}
                                                     strokeWidth={1}
                                                 />
                                                 {/* Body (open-close rectangle) */}
                                                 <rect
-                                                    x={x}
-                                                    y={y}
-                                                    width={width}
-                                                    height={height || 1} // Ensure height is at least 1 for flat candles
+                                                    x={x + 2}
+                                                    y={bodyTop}
+                                                    width={width - 4}
+                                                    height={bodyHeight}
                                                     fill={color}
                                                     stroke={color}
                                                     strokeWidth={1}
@@ -250,6 +305,34 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                                             </g>
                                         );
                                     }}
+                                />
+                                {/* Moving Average Lines */}
+                                <Line
+                                    type="monotone"
+                                    dataKey="ma5"
+                                    stroke="#f59e0b"
+                                    strokeWidth={1.5}
+                                    dot={false}
+                                    name="MA5"
+                                    connectNulls
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="ma20"
+                                    stroke="#3b82f6"
+                                    strokeWidth={1.5}
+                                    dot={false}
+                                    name="MA20"
+                                    connectNulls
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="ma60"
+                                    stroke="#8b5cf6"
+                                    strokeWidth={1.5}
+                                    dot={false}
+                                    name="MA60"
+                                    connectNulls
                                 />
                             </ComposedChart>
                         </ResponsiveContainer>
