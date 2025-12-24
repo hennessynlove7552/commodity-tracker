@@ -125,7 +125,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🌾',
     },
     {
-        id: '13',
+        id: '10',
         symbol: 'ZR=F',
         name: 'Rice',
         nameKo: '쌀',
@@ -138,7 +138,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🍚',
     },
     {
-        id: '14',
+        id: '11',
         symbol: 'BARLEY',
         name: 'Barley',
         nameKo: '보리',
@@ -151,7 +151,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🌾',
     },
     {
-        id: '15',
+        id: '12',
         symbol: 'SORGHUM',
         name: 'Sorghum',
         nameKo: '수수',
@@ -165,7 +165,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Agriculture - Oilseeds & Oils (유지종자 및 유지)
     {
-        id: '16',
+        id: '13',
         symbol: 'ZS=F',
         name: 'Soybeans',
         nameKo: '대두',
@@ -178,7 +178,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🫘',
     },
     {
-        id: '17',
+        id: '14',
         symbol: 'ZM=F',
         name: 'Soybean Meal',
         nameKo: '대두박',
@@ -191,7 +191,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🫘',
     },
     {
-        id: '18',
+        id: '15',
         symbol: 'ZL=F',
         name: 'Soybean Oil',
         nameKo: '대두유',
@@ -204,7 +204,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🫘',
     },
     {
-        id: '19',
+        id: '16',
         symbol: 'RS=F',
         name: 'Canola',
         nameKo: '카놀라',
@@ -217,7 +217,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🌻',
     },
     {
-        id: '20',
+        id: '17',
         symbol: 'SUNFLOWER',
         name: 'Sunflower Seeds',
         nameKo: '해바라기씨',
@@ -230,7 +230,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🌻',
     },
     {
-        id: '21',
+        id: '18',
         symbol: 'PALM',
         name: 'Palm Oil',
         nameKo: '팜유',
@@ -244,7 +244,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Agriculture - Soft Commodities (가공 식품/기호 농산물)
     {
-        id: '22',
+        id: '19',
         symbol: 'KC=F',
         name: 'Coffee',
         nameKo: '커피',
@@ -257,7 +257,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '☕',
     },
     {
-        id: '23',
+        id: '20',
         symbol: 'SB=F',
         name: 'Sugar',
         nameKo: '설탕',
@@ -270,7 +270,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🍬',
     },
     {
-        id: '24',
+        id: '21',
         symbol: 'CC=F',
         name: 'Cocoa',
         nameKo: '코코아',
@@ -283,7 +283,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🍫',
     },
     {
-        id: '25',
+        id: '22',
         symbol: 'OJ=F',
         name: 'Orange Juice',
         nameKo: '오렌지 주스',
@@ -296,7 +296,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🍊',
     },
     {
-        id: '26',
+        id: '23',
         symbol: 'CT=F',
         name: 'Cotton',
         nameKo: '면화',
@@ -310,7 +310,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Agriculture - Livestock (축산물)
     {
-        id: '27',
+        id: '24',
         symbol: 'LE=F',
         name: 'Live Cattle',
         nameKo: '생우',
@@ -323,7 +323,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🐄',
     },
     {
-        id: '28',
+        id: '25',
         symbol: 'GF=F',
         name: 'Feeder Cattle',
         nameKo: '사육우',
@@ -336,7 +336,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🐄',
     },
     {
-        id: '29',
+        id: '26',
         symbol: 'HE=F',
         name: 'Lean Hogs',
         nameKo: '돼지',
@@ -350,7 +350,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Agriculture - Dairy (유제품)
     {
-        id: '30',
+        id: '27',
         symbol: 'DC=F',
         name: 'Milk',
         nameKo: '우유',
@@ -363,7 +363,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🥛',
     },
     {
-        id: '31',
+        id: '28',
         symbol: 'CSC=F',
         name: 'Cheese',
         nameKo: '치즈',
@@ -376,7 +376,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🧀',
     },
     {
-        id: '32',
+        id: '29',
         symbol: 'CB=F',
         name: 'Butter',
         nameKo: '버터',
@@ -390,7 +390,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
     },
     // Industrial Metals
     {
-        id: '33',
+        id: '30',
         symbol: 'HG=F',
         name: 'Copper',
         nameKo: '구리',
@@ -403,7 +403,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '🔶',
     },
     {
-        id: '34',
+        id: '31',
         symbol: 'ALI=F',
         name: 'Aluminum',
         nameKo: '알루미늄',
@@ -416,7 +416,7 @@ export const MOCK_COMMODITIES: Commodity[] = [
         icon: '⚙️',
     },
     {
-        id: '35',
+        id: '32',
         symbol: 'NI=F',
         name: 'Nickel',
         nameKo: '니켈',
