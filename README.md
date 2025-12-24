@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Test Coverage](https://img.shields.io/badge/Coverage-80%25-brightgreen.svg)](docs/TESTING_STRATEGY.md)
 
-[🚀 Live Demo](https://your-username.github.io/commodity-tracker/) | [📖 Documentation](docs/) | [🐛 Report Bug](issues) | [✨ Request Feature](issues)
+[🚀 Live Demo](https://hennessynlove7552.github.io/commodity-tracker/) | [📖 Documentation](docs/) | [🐛 Report Bug](https://github.com/hennessynlove7552/commodity-tracker/issues) | [✨ Request Feature](https://github.com/hennessynlove7552/commodity-tracker/issues)
 
 ---
 
@@ -309,7 +309,63 @@ const filteredCommodities = useMemo(() => {
 
 ---
 
-## 🛠️ 기술 스택
+## 📊 데이터 출처 및 한계
+
+### 실시간 데이터 제공 API
+
+이 프로젝트는 다음 API들을 통해 원자재 가격 데이터를 수집합니다:
+
+#### 1. **Alpha Vantage**
+- **제공 데이터**: 주요 원자재 선물 가격 (금, 은, 원유 등)
+- **갱신 주기**: 실시간 ~ 15분 지연
+- **무료 티어 제한**: 5 API calls/분, 500 calls/일
+- **데이터 범위**: 주요 거래소 상장 원자재
+- **신뢰도**: ⭐⭐⭐⭐ (Bloomberg 터미널 데이터 기반)
+
+#### 2. **Twelve Data**
+- **제공 데이터**: 글로벌 원자재 시장 데이터
+- **갱신 주기**: 실시간 ~ 1분 지연
+- **무료 티어 제한**: 8 API calls/분, 800 calls/일
+- **데이터 범위**: 5,000+ 원자재 및 선물 계약
+- **신뢰도**: ⭐⭐⭐⭐⭐ (기관투자자급 데이터)
+
+#### 3. **Finnhub**
+- **제공 데이터**: 원자재 관련 뉴스 및 시장 센티먼트
+- **갱신 주기**: 실시간
+- **무료 티어 제한**: 60 API calls/분
+- **데이터 범위**: 글로벌 금융 뉴스
+- **신뢰도**: ⭐⭐⭐⭐ (주요 언론사 집계)
+
+### ⚠️ 데이터 사용 시 주의사항
+
+1. **지연 시간**: 무료 API는 실시간 데이터가 아닐 수 있습니다 (최대 15분 지연)
+2. **API 제한**: 일일 호출 횟수 제한으로 인해 일부 기능이 제한될 수 있습니다
+3. **데이터 정확성**: 투자 결정에 사용하기 전 공식 거래소 데이터와 교차 검증 필요
+4. **커버리지**: 모든 원자재가 제공되지 않을 수 있으며, 일부 신흥 시장 데이터는 제외됩니다
+5. **MVP 단계**: 현재는 Mock 데이터를 사용하며, 실제 API 연동은 Phase 4에서 구현 예정
+
+### � 데이터 품질 보장
+
+```typescript
+// API 응답 검증 예시
+interface DataQualityCheck {
+  timestamp: Date;          // 데이터 시간
+  source: string;           // 데이터 출처
+  latency: number;          // 지연 시간 (ms)
+  confidence: number;       // 신뢰도 (0-1)
+}
+
+// 여러 소스에서 데이터를 가져와 교차 검증
+const validatePrice = (prices: Price[]) => {
+  const avg = prices.reduce((sum, p) => sum + p.value, 0) / prices.length;
+  const variance = prices.some(p => Math.abs(p.value - avg) / avg > 0.05);
+  return !variance; // 5% 이상 차이나면 경고
+};
+```
+
+---
+
+## �🛠️ 기술 스택
 
 ### Frontend Core
 
@@ -583,6 +639,142 @@ git push origin main
    - `https://your-username.github.io/commodity-tracker/`
 
 자세한 내용은 [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)를 참고하세요.
+
+---
+
+## 🗺️ 향후 로드맵
+
+### Phase 4: 고급 리스크 관리 기능 (계획 중)
+
+#### 1. **스프레드 분석 (Spread Analysis)**
+
+원자재 간 가격 차이를 분석하여 차익거래 기회를 포착합니다.
+
+```typescript
+// 스프레드 계산 예시
+interface SpreadAnalysis {
+  pair: [Commodity, Commodity];  // 비교 대상
+  spread: number;                // 현재 스프레드
+  historicalAvg: number;         // 역사적 평균
+  zscore: number;                // Z-Score (표준편차)
+  signal: 'BUY' | 'SELL' | 'HOLD'; // 거래 신호
+}
+
+// 예: WTI vs Brent 원유 스프레드
+const analyzeSpread = (wti: number, brent: number) => {
+  const spread = brent - wti;
+  const historicalAvg = 2.5; // USD
+  const stdDev = 1.2;
+  const zscore = (spread - historicalAvg) / stdDev;
+  
+  return {
+    spread,
+    zscore,
+    signal: zscore > 2 ? 'SELL' : zscore < -2 ? 'BUY' : 'HOLD'
+  };
+};
+```
+
+**활용 사례:**
+- WTI vs Brent 원유 스프레드 거래
+- 금 vs 은 비율 (Gold/Silver Ratio) 분석
+- 옥수수 vs 밀 가격 차이 모니터링
+
+#### 2. **운임 지수 연동 (Freight Index Integration)**
+
+ Baltic Dry Index (BDI) 등 해운 운임 지수를 연동하여 물류 비용을 고려한 원자재 가격 분석을 제공합니다.
+
+```typescript
+interface FreightImpact {
+  commodity: Commodity;
+  origin: string;              // 원산지
+  destination: string;         // 목적지
+  freightCost: number;         // 운임 비용
+  totalCost: number;           // 총 비용 (원자재 + 운임)
+  profitMargin: number;        // 수익률
+}
+
+// BDI 기반 운임 비용 계산
+const calculateFreightImpact = (
+  commodityPrice: number,
+  bdiIndex: number,
+  distance: number
+) => {
+  const baseFreight = 50; // USD per ton
+  const freightMultiplier = bdiIndex / 1000;
+  const distanceFactor = distance / 10000; // km
+  
+  return baseFreight * freightMultiplier * distanceFactor;
+};
+```
+
+**제공 기능:**
+- 실시간 BDI, Harpex 지수 모니터링
+- 주요 항로별 운임 비용 계산
+- 원자재 가격 + 운임 = 총 비용 시뮬레이션
+- 최적 구매 시점 알림
+
+#### 3. **포트폴리오 리스크 분석**
+
+```typescript
+interface PortfolioRisk {
+  commodities: Commodity[];
+  correlation: number[][];      // 상관관계 매트릭스
+  var: number;                  // Value at Risk (95%)
+  sharpeRatio: number;          // 샤프 비율
+  diversificationScore: number; // 분산 투자 점수
+}
+```
+
+**리스크 지표:**
+- **VaR (Value at Risk)**: 95% 신뢰수준 최대 손실액
+- **상관관계 분석**: 원자재 간 가격 움직임 패턴
+- **변동성 지수**: 역사적 가격 변동성
+- **베타 계수**: 시장 대비 민감도
+
+#### 4. **계절성 분석 (Seasonality Analysis)**
+
+```typescript
+interface SeasonalPattern {
+  commodity: Commodity;
+  month: number;
+  avgReturn: number;           // 평균 수익률
+  probability: number;         // 상승 확률
+  historicalData: number[];    // 과거 10년 데이터
+}
+```
+
+**분석 항목:**
+- 농산물: 수확기/비수확기 가격 패턴
+- 에너지: 난방유 수요 계절성 (겨울)
+- 귀금속: 명절 수요 (인도 디왈리, 중국 춘절)
+
+#### 5. **매크로 경제 지표 연동**
+
+```typescript
+interface MacroIndicator {
+  name: string;
+  value: number;
+  impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  correlation: number;         // 원자재 가격과의 상관관계
+}
+```
+
+**모니터링 지표:**
+- USD 인덱스 (DXY)
+- 미국 10년물 국채 수익률
+- 중국 PMI (제조업 구매관리자지수)
+- 글로벌 GDP 성장률
+
+### 구현 우선순위
+
+1. **Phase 4.1** (3주): 스프레드 분석 기능
+2. **Phase 4.2** (2주): 운임 지수 연동
+3. **Phase 4.3** (3주): 포트폴리오 리스크 분석
+4. **Phase 4.4** (2주): 계절성 분석
+5. **Phase 4.5** (2주): 매크로 지표 연동
+
+**총 예상 기간**: 12주 (약 3개월)
 
 ---
 
