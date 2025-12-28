@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, Line, ReferenceLine } from 'recharts';
 import { Commodity } from '@/types';
 import { formatCurrency, formatPercent } from '@/utils/formatters';
@@ -10,6 +10,7 @@ interface CommodityDetailModalProps {
 }
 
 type TimeRange = '1D' | '1W' | '1M' | '3M' | '1Y' | 'ALL';
+type DrawingTool = 'none' | 'horizontal' | 'trendline' | 'fibonacci';
 
 interface ChartDataPoint {
     date: string;
@@ -33,6 +34,17 @@ interface ChartDataPoint {
     atr?: number | null;
 }
 
+interface DrawingObject {
+    id: string;
+    type: DrawingTool;
+    price?: number; // For horizontal line
+    startIndex?: number; // For trendline and fibonacci
+    endIndex?: number;
+    startPrice?: number;
+    endPrice?: number;
+    color: string;
+}
+
 export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ commodity, onClose }) => {
     const [timeRange, setTimeRange] = useState<TimeRange>('1M');
     const [activeIndicators, setActiveIndicators] = useState({
@@ -45,6 +57,11 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
         macd: true,
         atr: false,
     });
+
+    const [activeTool, setActiveTool] = useState<DrawingTool>('none');
+    const [drawings, setDrawings] = useState<DrawingObject[]>([]);
+    const [drawingStart, setDrawingStart] = useState<{ index: number; price: number } | null>(null);
+    const chartRef = useRef<HTMLDivElement>(null);
 
     // Advanced Market Data Simulation Engine (Institutional Grade)
     const chartData = useMemo(() => {
@@ -171,7 +188,6 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                 if (i < period - 1) {
                     ema.push(null);
                 } else if (i === period - 1) {
-                    // First EMA = SMA
                     let sum = 0;
                     for (let j = 0; j < period; j++) {
                         sum += data[i - j].close;
@@ -245,7 +261,6 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                 }
             }
 
-            // Signal line (9-period EMA of MACD)
             const signalLine: (number | null)[] = [];
             const signalPeriod = 9;
             const multiplier = 2 / (signalPeriod + 1);
@@ -276,7 +291,6 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                 }
             }
 
-            // Histogram
             const histogram = macdLine.map((macd, i) => {
                 if (macd === null || signalLine[i] === null) return null;
                 return Number((macd - signalLine[i]!).toFixed(2));
@@ -285,7 +299,7 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
             return { macdLine, signalLine, histogram };
         };
 
-        // ATR (Average True Range)
+        // ATR
         const calculateATR = (period: number = 14) => {
             const trueRanges = [];
 
@@ -326,7 +340,6 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
         const { macdLine, signalLine, histogram } = calculateMACD();
         const atr = calculateATR(14);
 
-        // Bollinger Bands
         const bb = data.map((_, i) => {
             if (i < 19) return { upper: null, middle: null, lower: null };
             const slice = data.slice(i - 19, i + 1).map(x => x.close);
@@ -384,6 +397,86 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
         }));
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleChartClick = useCallback((e: any) => {
+        if (activeTool === 'none' || !e || !e.activePayload || e.activePayload.length === 0) {
+            if (e && e.activePayload && e.activePayload.length > 0) {
+                handleCandleClick(e.activePayload[0].payload as ChartDataPoint);
+            }
+            return;
+        }
+
+        const clickedData = e.activePayload[0].payload as ChartDataPoint;
+        const clickedIndex = chartData.findIndex(d => d.date === clickedData.date);
+        const clickedPrice = clickedData.close;
+
+        if (activeTool === 'horizontal') {
+            // Add horizontal line
+            const newDrawing: DrawingObject = {
+                id: `h-${Date.now()}`,
+                type: 'horizontal',
+                price: clickedPrice,
+                color: '#2196f3'
+            };
+            setDrawings(prev => [...prev, newDrawing]);
+            setActiveTool('none');
+        } else if (activeTool === 'trendline' || activeTool === 'fibonacci') {
+            if (!drawingStart) {
+                // First click - set start point
+                setDrawingStart({ index: clickedIndex, price: clickedPrice });
+            } else {
+                // Second click - complete drawing
+                const newDrawing: DrawingObject = {
+                    id: `${activeTool}-${Date.now()}`,
+                    type: activeTool,
+                    startIndex: drawingStart.index,
+                    endIndex: clickedIndex,
+                    startPrice: drawingStart.price,
+                    endPrice: clickedPrice,
+                    color: activeTool === 'trendline' ? '#ff9800' : '#9c27b0'
+                };
+                setDrawings(prev => [...prev, newDrawing]);
+                setDrawingStart(null);
+                setActiveTool('none');
+            }
+        }
+    }, [activeTool, drawingStart, chartData]);
+
+    const clearDrawings = () => {
+        setDrawings([]);
+        setDrawingStart(null);
+        setActiveTool('none');
+    };
+
+    const removeDrawing = (id: string) => {
+        setDrawings(prev => prev.filter(d => d.id !== id));
+    };
+
+    // Render drawing objects as ReferenceLine components
+    const renderDrawings = () => {
+        return drawings.map(drawing => {
+            if (drawing.type === 'horizontal') {
+                return (
+                    <ReferenceLine
+                        key={drawing.id}
+                        y={drawing.price}
+                        stroke={drawing.color}
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        label={{
+                            value: `${drawing.price?.toFixed(2)}`,
+                            position: 'right',
+                            fill: drawing.color,
+                            fontSize: 10
+                        }}
+                    />
+                );
+            }
+            // Trendline and Fibonacci will be rendered as custom SVG overlays
+            return null;
+        });
+    };
+
     return (
         <div className={styles.overlay} onClick={handleOverlayClick}>
             <div className={styles.modal}>
@@ -422,6 +515,92 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                 </div>
 
                 <div className={styles.chartSection} style={{ backgroundColor: '#131722', borderRadius: '4px', padding: '16px', border: '1px solid #2a2e39' }}>
+                    {/* Drawing Tools */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #2a2e39' }}>
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '10px', color: '#888', marginRight: '8px' }}>드로잉 도구:</span>
+                            <button
+                                onClick={() => setActiveTool(activeTool === 'horizontal' ? 'none' : 'horizontal')}
+                                style={{
+                                    background: activeTool === 'horizontal' ? '#2196f3' : 'transparent',
+                                    color: activeTool === 'horizontal' ? '#fff' : '#2196f3',
+                                    border: `1px solid #2196f3`,
+                                    borderRadius: '3px',
+                                    padding: '4px 8px',
+                                    fontSize: '10px',
+                                    cursor: 'pointer',
+                                    fontWeight: activeTool === 'horizontal' ? 600 : 400
+                                }}
+                                title="수평선 그리기"
+                            >
+                                ─ 수평선
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setActiveTool(activeTool === 'trendline' ? 'none' : 'trendline');
+                                    setDrawingStart(null);
+                                }}
+                                style={{
+                                    background: activeTool === 'trendline' ? '#ff9800' : 'transparent',
+                                    color: activeTool === 'trendline' ? '#fff' : '#ff9800',
+                                    border: `1px solid #ff9800`,
+                                    borderRadius: '3px',
+                                    padding: '4px 8px',
+                                    fontSize: '10px',
+                                    cursor: 'pointer',
+                                    fontWeight: activeTool === 'trendline' ? 600 : 400
+                                }}
+                                title="추세선 그리기"
+                            >
+                                ╱ 추세선
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setActiveTool(activeTool === 'fibonacci' ? 'none' : 'fibonacci');
+                                    setDrawingStart(null);
+                                }}
+                                style={{
+                                    background: activeTool === 'fibonacci' ? '#9c27b0' : 'transparent',
+                                    color: activeTool === 'fibonacci' ? '#fff' : '#9c27b0',
+                                    border: `1px solid #9c27b0`,
+                                    borderRadius: '3px',
+                                    padding: '4px 8px',
+                                    fontSize: '10px',
+                                    cursor: 'pointer',
+                                    fontWeight: activeTool === 'fibonacci' ? 600 : 400
+                                }}
+                                title="피보나치 되돌림"
+                            >
+                                φ 피보나치
+                            </button>
+                            {drawings.length > 0 && (
+                                <button
+                                    onClick={clearDrawings}
+                                    style={{
+                                        background: 'transparent',
+                                        color: '#ef4444',
+                                        border: `1px solid #ef4444`,
+                                        borderRadius: '3px',
+                                        padding: '4px 8px',
+                                        fontSize: '10px',
+                                        cursor: 'pointer',
+                                        marginLeft: '8px'
+                                    }}
+                                    title="모든 드로잉 삭제"
+                                >
+                                    × 전체 삭제
+                                </button>
+                            )}
+                        </div>
+                        {activeTool !== 'none' && (
+                            <div style={{ fontSize: '10px', color: '#f59e0b', fontStyle: 'italic' }}>
+                                {activeTool === 'horizontal' && '차트를 클릭하여 수평선을 그립니다'}
+                                {activeTool === 'trendline' && (drawingStart ? '끝점을 클릭하세요' : '시작점을 클릭하세요')}
+                                {activeTool === 'fibonacci' && (drawingStart ? '끝점을 클릭하세요' : '시작점을 클릭하세요')}
+                            </div>
+                        )}
+                    </div>
+
                     <div className={styles.chartControls} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid #2a2e39', paddingBottom: '8px' }}>
                         <div className={styles.timeRangeButtons} style={{ display: 'flex', gap: '4px' }}>
                             {(['1D', '1W', '1M', '3M', '1Y', 'ALL'] as TimeRange[]).map((range) => (
@@ -519,17 +698,12 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                     </div>
 
                     {/* Main Price Chart */}
-                    <div style={{ height: 350, width: '100%', position: 'relative' }}>
+                    <div ref={chartRef} style={{ height: 350, width: '100%', position: 'relative' }}>
                         <ResponsiveContainer>
                             <ComposedChart
                                 data={chartData}
                                 margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                onClick={(e: any) => {
-                                    if (e && e.activePayload && e.activePayload.length > 0) {
-                                        handleCandleClick(e.activePayload[0].payload as ChartDataPoint);
-                                    }
-                                }}
+                                onClick={handleChartClick}
                             >
                                 <CartesianGrid stroke="#2a2e39" strokeDasharray="1 1" vertical={false} />
                                 <XAxis
@@ -560,6 +734,9 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                                         return [Number(value).toFixed(2), name];
                                     }}
                                 />
+
+                                {/* Render drawings */}
+                                {renderDrawings()}
 
                                 {activeIndicators.bb && (
                                     <>
@@ -620,6 +797,51 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                             </ComposedChart>
                         </ResponsiveContainer>
                     </div>
+
+                    {/* Drawings List */}
+                    {drawings.length > 0 && (
+                        <div style={{ marginTop: '8px', padding: '8px', backgroundColor: '#1e222d', borderRadius: '4px', border: '1px solid #2a2e39' }}>
+                            <div style={{ fontSize: '10px', color: '#888', marginBottom: '4px' }}>드로잉 목록:</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                {drawings.map(drawing => (
+                                    <div key={drawing.id} style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        padding: '2px 6px',
+                                        backgroundColor: '#131722',
+                                        borderRadius: '3px',
+                                        fontSize: '10px',
+                                        border: `1px solid ${drawing.color}`
+                                    }}>
+                                        <span style={{ color: drawing.color }}>
+                                            {drawing.type === 'horizontal' && '─'}
+                                            {drawing.type === 'trendline' && '╱'}
+                                            {drawing.type === 'fibonacci' && 'φ'}
+                                        </span>
+                                        <span style={{ color: '#b2b5be' }}>
+                                            {drawing.type === 'horizontal' && `${drawing.price?.toFixed(2)}`}
+                                            {drawing.type === 'trendline' && '추세선'}
+                                            {drawing.type === 'fibonacci' && '피보나치'}
+                                        </span>
+                                        <button
+                                            onClick={() => removeDrawing(drawing.id)}
+                                            style={{
+                                                background: 'transparent',
+                                                border: 'none',
+                                                color: '#ef4444',
+                                                cursor: 'pointer',
+                                                padding: '0 2px',
+                                                fontSize: '12px'
+                                            }}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Volume Chart */}
                     <div style={{ marginTop: '16px' }}>
