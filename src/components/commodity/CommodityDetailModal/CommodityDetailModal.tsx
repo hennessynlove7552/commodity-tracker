@@ -78,9 +78,15 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
 
         const basePrice = commodity.currentPrice;
 
-        // Use commodity ID and name for unique seed
-        const seed = commodity.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) +
-            commodity.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        // Enhanced seed generation for better uniqueness
+        // Uses position-weighted character codes to ensure different commodities have distinct seeds
+        const idSeed = commodity.id.split('').reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 1) * 31, 0);
+        const nameSeed = commodity.name.split('').reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 1) * 37, 0);
+        const symbolSeed = commodity.symbol.split('').reduce((acc, char, idx) => acc + char.charCodeAt(0) * (idx + 1) * 41, 0);
+        const seed = (idSeed * 1000 + nameSeed * 100 + symbolSeed) % 2147483647; // Keep within safe integer range
+
+        // Debug: log seed for verification (remove in production)
+        // console.log(`${commodity.name} (${commodity.id}): seed=${seed}`);
 
         // Commodity-specific volatility profiles (more realistic)
         const volProfile: { [key in CommodityCategory]: number } = {
