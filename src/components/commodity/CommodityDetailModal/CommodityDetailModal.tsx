@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, Line, ReferenceLine } from 'recharts';
 import { Commodity } from '@/types';
 import { formatCurrency, formatPercent } from '@/utils/formatters';
@@ -61,7 +61,6 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
     const [activeTool, setActiveTool] = useState<DrawingTool>('none');
     const [drawings, setDrawings] = useState<DrawingObject[]>([]);
     const [drawingStart, setDrawingStart] = useState<{ index: number; price: number } | null>(null);
-    const chartRef = useRef<HTMLDivElement>(null);
 
     // Advanced Market Data Simulation Engine (Institutional Grade)
     const chartData = useMemo(() => {
@@ -477,503 +476,342 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
         });
     };
 
+    const latestData = chartData[chartData.length - 1];
+
     return (
         <div className={styles.overlay} onClick={handleOverlayClick}>
             <div className={styles.modal}>
+                {/* Header */}
                 <div className={styles.header}>
-                    <div className={styles.headerTitle}>
-                        <h2>{commodity.name}</h2>
-                        <span className={styles.categoryBadge}>{commodity.category}</span>
+                    <div className={styles.headerLeft}>
+                        <div className={styles.headerTitle}>
+                            <h2 className={styles.commodityName}>{commodity.name}</h2>
+                            <div className={styles.commodityMeta}>
+                                <span>{commodity.category}</span>
+                                <span>•</span>
+                                <span>1 Month • OANDA</span>
+                            </div>
+                        </div>
+                        <div className={styles.priceInfo}>
+                            <div className={styles.currentPrice}>
+                                {formatCurrency(commodity.currentPrice, commodity.currency)}
+                            </div>
+                            <div className={`${styles.priceChange} ${commodity.change >= 0 ? styles.positive : styles.negative}`}>
+                                {commodity.change >= 0 ? '+' : ''}{commodity.change} ({commodity.change >= 0 ? '+' : ''}{formatPercent(commodity.changePercent)})
+                            </div>
+                            <div className={styles.dayRange}>
+                                <span>L: {formatCurrency(stats.low, commodity.currency)}</span>
+                                <span>H: {formatCurrency(stats.high, commodity.currency)}</span>
+                            </div>
+                        </div>
                     </div>
-                    <button className={styles.closeButton} onClick={onClose}>×</button>
-                </div>
-
-                <div className={styles.priceSection}>
-                    <div className={styles.currentPrice}>
-                        {formatCurrency(commodity.currentPrice, commodity.currency)}
-                    </div>
-                    <div className={`${styles.priceChange} ${commodity.change >= 0 ? styles.positive : styles.negative}`}>
-                        {commodity.change >= 0 ? '▲' : '▼'} {Math.abs(commodity.change)} ({formatPercent(Math.abs(commodity.changePercent))})
-                    </div>
-                </div>
-
-                <div className={styles.statsGrid}>
-                    <div className={styles.statItem}>
-                        <span className={styles.statLabel}>고가 (High)</span>
-                        <span className={styles.statValue} style={{ color: '#26a69a' }}>{formatCurrency(stats.high, commodity.currency)}</span>
-                    </div>
-                    <div className={styles.statItem}>
-                        <span className={styles.statLabel}>저가 (Low)</span>
-                        <span className={styles.statValue} style={{ color: '#ef5350' }}>{formatCurrency(stats.low, commodity.currency)}</span>
-                    </div>
-                    <div className={styles.statItem}>
-                        <span className={styles.statLabel}>이동평균 (SMA 20)</span>
-                        <span className={styles.statValue} style={{ color: '#f59e0b' }}>
-                            {chartData.length > 0 && chartData[chartData.length - 1].sma20 ? formatCurrency(chartData[chartData.length - 1].sma20!, commodity.currency) : '-'}
-                        </span>
+                    <div className={styles.headerRight}>
+                        <button className={styles.closeButton} onClick={onClose}>×</button>
                     </div>
                 </div>
 
-                <div className={styles.chartSection} style={{ backgroundColor: '#131722', borderRadius: '4px', padding: '16px', border: '1px solid #2a2e39' }}>
-                    {/* Drawing Tools */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #2a2e39' }}>
-                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                            <span style={{ fontSize: '10px', color: '#888', marginRight: '8px' }}>드로잉 도구:</span>
-                            <button
-                                onClick={() => setActiveTool(activeTool === 'horizontal' ? 'none' : 'horizontal')}
-                                style={{
-                                    background: activeTool === 'horizontal' ? '#2196f3' : 'transparent',
-                                    color: activeTool === 'horizontal' ? '#fff' : '#2196f3',
-                                    border: `1px solid #2196f3`,
-                                    borderRadius: '3px',
-                                    padding: '4px 8px',
-                                    fontSize: '10px',
-                                    cursor: 'pointer',
-                                    fontWeight: activeTool === 'horizontal' ? 600 : 400
-                                }}
-                                title="수평선 그리기"
-                            >
-                                ─ 수평선
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setActiveTool(activeTool === 'trendline' ? 'none' : 'trendline');
-                                    setDrawingStart(null);
-                                }}
-                                style={{
-                                    background: activeTool === 'trendline' ? '#ff9800' : 'transparent',
-                                    color: activeTool === 'trendline' ? '#fff' : '#ff9800',
-                                    border: `1px solid #ff9800`,
-                                    borderRadius: '3px',
-                                    padding: '4px 8px',
-                                    fontSize: '10px',
-                                    cursor: 'pointer',
-                                    fontWeight: activeTool === 'trendline' ? 600 : 400
-                                }}
-                                title="추세선 그리기"
-                            >
-                                ╱ 추세선
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setActiveTool(activeTool === 'fibonacci' ? 'none' : 'fibonacci');
-                                    setDrawingStart(null);
-                                }}
-                                style={{
-                                    background: activeTool === 'fibonacci' ? '#9c27b0' : 'transparent',
-                                    color: activeTool === 'fibonacci' ? '#fff' : '#9c27b0',
-                                    border: `1px solid #9c27b0`,
-                                    borderRadius: '3px',
-                                    padding: '4px 8px',
-                                    fontSize: '10px',
-                                    cursor: 'pointer',
-                                    fontWeight: activeTool === 'fibonacci' ? 600 : 400
-                                }}
-                                title="피보나치 되돌림"
-                            >
-                                φ 피보나치
-                            </button>
-                            {drawings.length > 0 && (
-                                <button
-                                    onClick={clearDrawings}
-                                    style={{
-                                        background: 'transparent',
-                                        color: '#ef4444',
-                                        border: `1px solid #ef4444`,
-                                        borderRadius: '3px',
-                                        padding: '4px 8px',
-                                        fontSize: '10px',
-                                        cursor: 'pointer',
-                                        marginLeft: '8px'
-                                    }}
-                                    title="모든 드로잉 삭제"
-                                >
-                                    × 전체 삭제
-                                </button>
+                {/* Main Content - 3 Column Layout */}
+                <div className={styles.content}>
+                    {/* Left Sidebar - Indicators */}
+                    <div className={styles.leftSidebar}>
+                        <div className={styles.indicatorsList}>
+                            {activeIndicators.sma20 && latestData.sma20 && (
+                                <div className={styles.indicatorItem}>
+                                    <div className={styles.indicatorLabel}>
+                                        <div className={styles.indicatorColor} style={{ background: '#f59e0b' }}></div>
+                                        <span className={styles.indicatorName}>SMA 20</span>
+                                    </div>
+                                    <span className={styles.indicatorValue}>{latestData.sma20.toFixed(2)}</span>
+                                </div>
+                            )}
+                            {activeIndicators.sma50 && latestData.sma50 && (
+                                <div className={styles.indicatorItem}>
+                                    <div className={styles.indicatorLabel}>
+                                        <div className={styles.indicatorColor} style={{ background: '#2962ff' }}></div>
+                                        <span className={styles.indicatorName}>SMA 50</span>
+                                    </div>
+                                    <span className={styles.indicatorValue}>{latestData.sma50.toFixed(2)}</span>
+                                </div>
+                            )}
+                            {activeIndicators.ema12 && latestData.ema12 && (
+                                <div className={styles.indicatorItem}>
+                                    <div className={styles.indicatorLabel}>
+                                        <div className={styles.indicatorColor} style={{ background: '#10b981' }}></div>
+                                        <span className={styles.indicatorName}>EMA 12</span>
+                                    </div>
+                                    <span className={styles.indicatorValue}>{latestData.ema12.toFixed(2)}</span>
+                                </div>
+                            )}
+                            {activeIndicators.bb && latestData.bbUpper && (
+                                <>
+                                    <div className={styles.indicatorItem}>
+                                        <div className={styles.indicatorLabel}>
+                                            <div className={styles.indicatorColor} style={{ background: '#26a69a' }}></div>
+                                            <span className={styles.indicatorName}>BB Upper</span>
+                                        </div>
+                                        <span className={styles.indicatorValue}>{latestData.bbUpper.toFixed(2)}</span>
+                                    </div>
+                                    <div className={styles.indicatorItem}>
+                                        <div className={styles.indicatorLabel}>
+                                            <div className={styles.indicatorColor} style={{ background: '#26a69a' }}></div>
+                                            <span className={styles.indicatorName}>BB Lower</span>
+                                        </div>
+                                        <span className={styles.indicatorValue}>{latestData.bbLower?.toFixed(2)}</span>
+                                    </div>
+                                </>
                             )}
                         </div>
-                        {activeTool !== 'none' && (
-                            <div style={{ fontSize: '10px', color: '#f59e0b', fontStyle: 'italic' }}>
-                                {activeTool === 'horizontal' && '차트를 클릭하여 수평선을 그립니다'}
-                                {activeTool === 'trendline' && (drawingStart ? '끝점을 클릭하세요' : '시작점을 클릭하세요')}
-                                {activeTool === 'fibonacci' && (drawingStart ? '끝점을 클릭하세요' : '시작점을 클릭하세요')}
-                            </div>
-                        )}
                     </div>
 
-                    <div className={styles.chartControls} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid #2a2e39', paddingBottom: '8px' }}>
-                        <div className={styles.timeRangeButtons} style={{ display: 'flex', gap: '4px' }}>
-                            {(['1D', '1W', '1M', '3M', '1Y', 'ALL'] as TimeRange[]).map((range) => (
-                                <button
-                                    key={range}
-                                    onClick={() => setTimeRange(range)}
-                                    style={{
-                                        background: timeRange === range ? '#2962ff' : 'transparent',
-                                        color: timeRange === range ? '#fff' : '#b2b5be',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        padding: '4px 8px',
-                                        fontSize: '12px',
-                                        cursor: 'pointer',
-                                        fontWeight: timeRange === range ? 600 : 400
-                                    }}
-                                >
-                                    {range}
-                                </button>
-                            ))}
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px', fontSize: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <button onClick={() => toggleIndicator('sma20')} style={{
-                                background: activeIndicators.sma20 ? '#f59e0b20' : 'transparent',
-                                color: activeIndicators.sma20 ? '#f59e0b' : '#666',
-                                border: `1px solid ${activeIndicators.sma20 ? '#f59e0b' : '#444'}`,
-                                borderRadius: '3px',
-                                padding: '2px 6px',
-                                cursor: 'pointer'
-                            }}>SMA20</button>
-                            <button onClick={() => toggleIndicator('sma50')} style={{
-                                background: activeIndicators.sma50 ? '#2962ff20' : 'transparent',
-                                color: activeIndicators.sma50 ? '#2962ff' : '#666',
-                                border: `1px solid ${activeIndicators.sma50 ? '#2962ff' : '#444'}`,
-                                borderRadius: '3px',
-                                padding: '2px 6px',
-                                cursor: 'pointer'
-                            }}>SMA50</button>
-                            <button onClick={() => toggleIndicator('ema12')} style={{
-                                background: activeIndicators.ema12 ? '#10b98120' : 'transparent',
-                                color: activeIndicators.ema12 ? '#10b981' : '#666',
-                                border: `1px solid ${activeIndicators.ema12 ? '#10b981' : '#444'}`,
-                                borderRadius: '3px',
-                                padding: '2px 6px',
-                                cursor: 'pointer'
-                            }}>EMA12</button>
-                            <button onClick={() => toggleIndicator('ema26')} style={{
-                                background: activeIndicators.ema26 ? '#ec489920' : 'transparent',
-                                color: activeIndicators.ema26 ? '#ec4899' : '#666',
-                                border: `1px solid ${activeIndicators.ema26 ? '#ec4899' : '#444'}`,
-                                borderRadius: '3px',
-                                padding: '2px 6px',
-                                cursor: 'pointer'
-                            }}>EMA26</button>
-                            <button onClick={() => toggleIndicator('bb')} style={{
-                                background: activeIndicators.bb ? '#26a69a20' : 'transparent',
-                                color: activeIndicators.bb ? '#26a69a' : '#666',
-                                border: `1px solid ${activeIndicators.bb ? '#26a69a' : '#444'}`,
-                                borderRadius: '3px',
-                                padding: '2px 6px',
-                                cursor: 'pointer'
-                            }}>BB</button>
-                        </div>
-                    </div>
-
-                    {/* Selected Candle Info Panel */}
-                    <div style={{
-                        height: '32px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        fontSize: '11px',
-                        color: '#b2b5be',
-                        marginBottom: '8px',
-                        padding: '0 8px',
-                        backgroundColor: '#1e222d',
-                        borderRadius: '4px',
-                        border: '1px solid #2a2e39'
-                    }}>
-                        {selectedCandle ? (
-                            <>
-                                <span style={{ color: '#fff', fontWeight: 'bold' }}>{selectedCandle.date}</span>
-                                <div style={{ width: '1px', height: '12px', backgroundColor: '#333' }}></div>
-                                <span>시 <span style={{ color: '#fff' }}>{formatCurrency(selectedCandle.open, commodity.currency)}</span></span>
-                                <span>고 <span style={{ color: '#10b981' }}>{formatCurrency(selectedCandle.high, commodity.currency)}</span></span>
-                                <span>저 <span style={{ color: '#ef4444' }}>{formatCurrency(selectedCandle.low, commodity.currency)}</span></span>
-                                <span>종 <span style={{ color: selectedCandle.close >= selectedCandle.open ? '#10b981' : '#ef4444' }}>{formatCurrency(selectedCandle.close, commodity.currency)}</span></span>
-                                <div style={{ width: '1px', height: '12px', backgroundColor: '#333' }}></div>
-                                <span>Vol <span style={{ color: '#fff' }}>{selectedCandle.volume.toLocaleString()}</span></span>
-                                {selectedCandle.rsi && <span>RSI <span style={{ color: selectedCandle.rsi > 70 ? '#ef4444' : selectedCandle.rsi < 30 ? '#10b981' : '#fff' }}>{selectedCandle.rsi.toFixed(1)}</span></span>}
-                            </>
-                        ) : (
-                            <span>차트의 캔들을 클릭하여 상세 정보를 확인하세요.</span>
-                        )}
-                    </div>
-
-                    {/* Main Price Chart */}
-                    <div ref={chartRef} style={{ height: 350, width: '100%', position: 'relative' }}>
-                        <ResponsiveContainer>
-                            <ComposedChart
-                                data={chartData}
-                                margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-                                onClick={handleChartClick}
-                            >
-                                <CartesianGrid stroke="#2a2e39" strokeDasharray="1 1" vertical={false} />
-                                <XAxis
-                                    dataKey="date"
-                                    tick={{ fill: '#b2b5be', fontSize: 10 }}
-                                    tickLine={false}
-                                    axisLine={{ stroke: '#2a2e39' }}
-                                    minTickGap={30}
-                                />
-                                <YAxis
-                                    orientation="right"
-                                    domain={['auto', 'auto']}
-                                    tick={{ fill: '#b2b5be', fontSize: 10 }}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickFormatter={(val) => val.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })}
-                                    width={60}
-                                />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#1e222d', borderColor: '#2a2e39', padding: '8px', borderRadius: '4px' }}
-                                    itemStyle={{ fontSize: '12px', padding: 0 }}
-                                    labelStyle={{ color: '#b2b5be', fontSize: '11px', marginBottom: '4px' }}
-                                    cursor={{ stroke: '#2a2e39', strokeDasharray: '3 3' }}
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    formatter={(value: any, name: any) => {
-                                        if (name === 'high' || name === 'low' || name === 'open' || name === 'close') return [Number(value).toFixed(2), name.toUpperCase()];
-                                        if (name === 'volume') return [Number(value).toLocaleString(), 'Vol'];
-                                        return [Number(value).toFixed(2), name];
-                                    }}
-                                />
-
-                                {/* Render drawings */}
-                                {renderDrawings()}
-
-                                {activeIndicators.bb && (
-                                    <>
-                                        <Line type="monotone" dataKey="bbUpper" stroke="#26a69a" strokeOpacity={0.2} dot={false} strokeWidth={1} isAnimationActive={false} />
-                                        <Line type="monotone" dataKey="bbLower" stroke="#26a69a" strokeOpacity={0.2} dot={false} strokeWidth={1} isAnimationActive={false} />
-                                    </>
-                                )}
-
-                                {activeIndicators.sma50 && <Line type="monotone" dataKey="sma50" stroke="#2962ff" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls />}
-                                {activeIndicators.sma20 && <Line type="monotone" dataKey="sma20" stroke="#f59e0b" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls />}
-                                {activeIndicators.ema12 && <Line type="monotone" dataKey="ema12" stroke="#10b981" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls strokeDasharray="3 3" />}
-                                {activeIndicators.ema26 && <Line type="monotone" dataKey="ema26" stroke="#ec4899" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls strokeDasharray="3 3" />}
-
-                                <Bar
-                                    dataKey={(entry: ChartDataPoint) => [entry.low, entry.high]}
-                                    fill="transparent"
-                                    maxBarSize={8}
-                                    isAnimationActive={false}
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    shape={(props: any) => {
-                                        const { x, y, width, height, payload } = props;
-                                        if (!payload || payload.open === undefined || payload.close === undefined) return <g />;
-
-                                        const { open, close, high, low } = payload;
-                                        const isUp = close >= open;
-                                        const color = isUp ? '#26a69a' : '#ef5350';
-
-                                        const range = high - low;
-                                        if (range === 0) return <g />;
-
-                                        const topY = y;
-                                        const bottomY = y + height;
-
-                                        const openRatio = (high - open) / range;
-                                        const closeRatio = (high - close) / range;
-
-                                        const bodyTopY = y + Math.min(openRatio, closeRatio) * height;
-                                        const bodyHeight = Math.abs(openRatio - closeRatio) * height;
-
-                                        const finalBodyHeight = Math.max(1, bodyHeight);
-                                        const centerX = x + width / 2;
-
-                                        return (
-                                            <g>
-                                                <line x1={centerX} y1={topY} x2={centerX} y2={bottomY} stroke={color} strokeWidth={1} />
-                                                <rect
-                                                    x={x}
-                                                    y={bodyTopY}
-                                                    width={width}
-                                                    height={finalBodyHeight}
-                                                    fill={color}
-                                                    stroke={color}
-                                                />
-                                            </g>
-                                        );
-                                    }}
-                                />
-                            </ComposedChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    {/* Drawings List */}
-                    {drawings.length > 0 && (
-                        <div style={{ marginTop: '8px', padding: '8px', backgroundColor: '#1e222d', borderRadius: '4px', border: '1px solid #2a2e39' }}>
-                            <div style={{ fontSize: '10px', color: '#888', marginBottom: '4px' }}>드로잉 목록:</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                                {drawings.map(drawing => (
-                                    <div key={drawing.id} style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '4px',
-                                        padding: '2px 6px',
-                                        backgroundColor: '#131722',
-                                        borderRadius: '3px',
-                                        fontSize: '10px',
-                                        border: `1px solid ${drawing.color}`
-                                    }}>
-                                        <span style={{ color: drawing.color }}>
-                                            {drawing.type === 'horizontal' && '─'}
-                                            {drawing.type === 'trendline' && '╱'}
-                                            {drawing.type === 'fibonacci' && 'φ'}
-                                        </span>
-                                        <span style={{ color: '#b2b5be' }}>
-                                            {drawing.type === 'horizontal' && `${drawing.price?.toFixed(2)}`}
-                                            {drawing.type === 'trendline' && '추세선'}
-                                            {drawing.type === 'fibonacci' && '피보나치'}
-                                        </span>
-                                        <button
-                                            onClick={() => removeDrawing(drawing.id)}
-                                            style={{
-                                                background: 'transparent',
-                                                border: 'none',
-                                                color: '#ef4444',
-                                                cursor: 'pointer',
-                                                padding: '0 2px',
-                                                fontSize: '12px'
-                                            }}
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
+                    {/* Center - Chart Area */}
+                    <div className={styles.chartArea}>
+                        {/* Chart Controls */}
+                        <div className={styles.chartControls}>
+                            <div className={styles.timeRangeButtons}>
+                                {(['1D', '1W', '1M', '3M', '1Y', 'ALL'] as TimeRange[]).map((range) => (
+                                    <button
+                                        key={range}
+                                        onClick={() => setTimeRange(range)}
+                                        className={`${styles.timeRangeButton} ${timeRange === range ? styles.active : ''}`}
+                                    >
+                                        {range}
+                                    </button>
                                 ))}
                             </div>
-                        </div>
-                    )}
-
-                    {/* Volume Chart */}
-                    <div style={{ marginTop: '16px' }}>
-                        <div style={{ fontSize: '10px', color: '#888', marginBottom: '4px', paddingLeft: '8px' }}>거래량 (Volume)</div>
-                        <ResponsiveContainer width="100%" height={80}>
-                            <ComposedChart data={chartData} margin={{ top: 0, right: 5, left: 5, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" opacity={0.3} vertical={false} />
-                                <XAxis dataKey="date" hide />
-                                <YAxis
-                                    orientation="right"
-                                    tick={{ fill: '#666', fontSize: 9 }}
-                                    tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
-                                    width={40}
-                                    axisLine={false}
-                                    tickLine={false}
-                                />
-                                <Bar
-                                    dataKey="volume"
-                                    isAnimationActive={false}
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    shape={(props: any) => {
-                                        const { x, y, width, height, payload } = props;
-                                        if (!payload) return <g />;
-                                        const color = payload.close >= payload.open ? '#26a69a' : '#ef5350';
-                                        return (
-                                            <rect
-                                                x={x}
-                                                y={y}
-                                                width={width}
-                                                height={height}
-                                                fill={color}
-                                                opacity={0.4}
-                                            />
-                                        );
+                            <div className={styles.drawingTools}>
+                                <button
+                                    onClick={() => setActiveTool(activeTool === 'horizontal' ? 'none' : 'horizontal')}
+                                    className={`${styles.toolButton} ${activeTool === 'horizontal' ? styles.active : ''}`}
+                                >
+                                    ─ 수평선
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setActiveTool(activeTool === 'trendline' ? 'none' : 'trendline');
+                                        setDrawingStart(null);
                                     }}
-                                />
-                            </ComposedChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    {/* RSI Panel */}
-                    {activeIndicators.rsi && (
-                        <div style={{ marginTop: '16px' }}>
-                            <div style={{ fontSize: '10px', color: '#888', marginBottom: '4px', paddingLeft: '8px' }}>RSI (14)</div>
-                            <ResponsiveContainer width="100%" height={100}>
-                                <ComposedChart data={chartData} margin={{ top: 0, right: 5, left: 5, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" opacity={0.3} vertical={false} />
-                                    <XAxis dataKey="date" hide />
-                                    <YAxis
-                                        orientation="right"
-                                        domain={[0, 100]}
-                                        ticks={[30, 50, 70]}
-                                        tick={{ fill: '#666', fontSize: 9 }}
-                                        width={40}
-                                        axisLine={false}
-                                        tickLine={false}
-                                    />
-                                    <ReferenceLine y={70} stroke="#ef4444" strokeDasharray="3 3" opacity={0.5} />
-                                    <ReferenceLine y={50} stroke="#666" strokeDasharray="3 3" opacity={0.3} />
-                                    <ReferenceLine y={30} stroke="#10b981" strokeDasharray="3 3" opacity={0.5} />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="rsi"
-                                        stroke="#9333ea"
-                                        dot={false}
-                                        strokeWidth={1.5}
-                                        isAnimationActive={false}
-                                        connectNulls
-                                    />
-                                </ComposedChart>
-                            </ResponsiveContainer>
+                                    className={`${styles.toolButton} ${activeTool === 'trendline' ? styles.active : ''}`}
+                                >
+                                    ╱ 추세선
+                                </button>
+                                {drawings.length > 0 && (
+                                    <button onClick={clearDrawings} className={styles.toolButton} style={{ color: '#ef4444', borderColor: '#ef4444' }}>
+                                        × 삭제
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                    )}
 
-                    {/* MACD Panel */}
-                    {activeIndicators.macd && (
-                        <div style={{ marginTop: '16px' }}>
-                            <div style={{ fontSize: '10px', color: '#888', marginBottom: '4px', paddingLeft: '8px' }}>MACD (12, 26, 9)</div>
-                            <ResponsiveContainer width="100%" height={100}>
-                                <ComposedChart data={chartData} margin={{ top: 0, right: 5, left: 5, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" opacity={0.3} vertical={false} />
-                                    <XAxis dataKey="date" hide />
+                        {/* Main Chart */}
+                        <div className={styles.chartWrapper}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <ComposedChart
+                                    data={chartData}
+                                    margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                                    onClick={handleChartClick}
+                                >
+                                    <CartesianGrid stroke="#1a1f3a" strokeDasharray="3 3" vertical={false} />
+                                    <XAxis
+                                        dataKey="date"
+                                        tick={{ fill: '#6b7280', fontSize: 10 }}
+                                        tickLine={false}
+                                        axisLine={{ stroke: '#1a1f3a' }}
+                                        minTickGap={40}
+                                    />
                                     <YAxis
                                         orientation="right"
-                                        tick={{ fill: '#666', fontSize: 9 }}
-                                        width={40}
-                                        axisLine={false}
+                                        domain={['auto', 'auto']}
+                                        tick={{ fill: '#6b7280', fontSize: 10 }}
                                         tickLine={false}
+                                        axisLine={false}
+                                        tickFormatter={(val) => val.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })}
+                                        width={70}
                                     />
-                                    <ReferenceLine y={0} stroke="#666" strokeDasharray="3 3" opacity={0.5} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#0d1129', borderColor: '#1a1f3a', padding: '8px', borderRadius: '4px' }}
+                                        itemStyle={{ fontSize: '11px', padding: 0, color: '#e0e3eb' }}
+                                        labelStyle={{ color: '#9ca3af', fontSize: '10px', marginBottom: '4px' }}
+                                        cursor={{ stroke: '#1a1f3a', strokeDasharray: '3 3' }}
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        formatter={(value: any, name: any) => {
+                                            if (name === 'high' || name === 'low' || name === 'open' || name === 'close') return [Number(value).toFixed(2), name.toUpperCase()];
+                                            return [Number(value).toFixed(2), name];
+                                        }}
+                                    />
+
+                                    {/* Drawings */}
+                                    {renderDrawings()}
+
+                                    {/* Bollinger Bands */}
+                                    {activeIndicators.bb && (
+                                        <>
+                                            <Line type="monotone" dataKey="bbUpper" stroke="#26a69a" strokeOpacity={0.3} dot={false} strokeWidth={1} isAnimationActive={false} />
+                                            <Line type="monotone" dataKey="bbLower" stroke="#26a69a" strokeOpacity={0.3} dot={false} strokeWidth={1} isAnimationActive={false} />
+                                        </>
+                                    )}
+
+                                    {/* Moving Averages */}
+                                    {activeIndicators.sma50 && <Line type="monotone" dataKey="sma50" stroke="#2962ff" dot={false} strokeWidth={2} isAnimationActive={false} connectNulls />}
+                                    {activeIndicators.sma20 && <Line type="monotone" dataKey="sma20" stroke="#f59e0b" dot={false} strokeWidth={2} isAnimationActive={false} connectNulls />}
+                                    {activeIndicators.ema12 && <Line type="monotone" dataKey="ema12" stroke="#10b981" dot={false} strokeWidth={2} isAnimationActive={false} connectNulls strokeDasharray="4 4" />}
+                                    {activeIndicators.ema26 && <Line type="monotone" dataKey="ema26" stroke="#ec4899" dot={false} strokeWidth={2} isAnimationActive={false} connectNulls strokeDasharray="4 4" />}
+
+                                    {/* Candlesticks */}
                                     <Bar
-                                        dataKey="macdHistogram"
+                                        dataKey={(entry: ChartDataPoint) => [entry.low, entry.high]}
+                                        fill="transparent"
+                                        maxBarSize={12}
                                         isAnimationActive={false}
                                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         shape={(props: any) => {
                                             const { x, y, width, height, payload } = props;
-                                            if (!payload || payload.macdHistogram === null) return <g />;
-                                            const color = payload.macdHistogram >= 0 ? '#26a69a' : '#ef5350';
+                                            if (!payload || payload.open === undefined || payload.close === undefined) return <g />;
+
+                                            const { open, close, high, low } = payload;
+                                            const isUp = close >= open;
+                                            const color = isUp ? '#26a69a' : '#ef5350';
+
+                                            const range = high - low;
+                                            if (range === 0) return <g />;
+
+                                            const openRatio = (high - open) / range;
+                                            const closeRatio = (high - close) / range;
+
+                                            const bodyTopY = y + Math.min(openRatio, closeRatio) * height;
+                                            const bodyHeight = Math.abs(openRatio - closeRatio) * height;
+                                            const finalBodyHeight = Math.max(1, bodyHeight);
+                                            const centerX = x + width / 2;
+
                                             return (
-                                                <rect
-                                                    x={x}
-                                                    y={y}
-                                                    width={width}
-                                                    height={height}
-                                                    fill={color}
-                                                    opacity={0.6}
-                                                />
+                                                <g>
+                                                    <line x1={centerX} y1={y} x2={centerX} y2={y + height} stroke={color} strokeWidth={1.5} />
+                                                    <rect
+                                                        x={x}
+                                                        y={bodyTopY}
+                                                        width={width}
+                                                        height={finalBodyHeight}
+                                                        fill={color}
+                                                        stroke={color}
+                                                    />
+                                                </g>
                                             );
                                         }}
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="macd"
-                                        stroke="#2196f3"
-                                        dot={false}
-                                        strokeWidth={1.5}
-                                        isAnimationActive={false}
-                                        connectNulls
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="macdSignal"
-                                        stroke="#ff9800"
-                                        dot={false}
-                                        strokeWidth={1.5}
-                                        isAnimationActive={false}
-                                        connectNulls
                                     />
                                 </ComposedChart>
                             </ResponsiveContainer>
                         </div>
-                    )}
+
+                        {/* Candle Info Bar */}
+                        <div className={styles.candleInfo}>
+                            {selectedCandle ? (
+                                <>
+                                    <div className={styles.candleInfoItem}>
+                                        <span className={styles.candleInfoLabel}>Date:</span>
+                                        <span className={styles.candleInfoValue}>{selectedCandle.date}</span>
+                                    </div>
+                                    <div className={styles.candleInfoItem}>
+                                        <span className={styles.candleInfoLabel}>O:</span>
+                                        <span className={styles.candleInfoValue}>{formatCurrency(selectedCandle.open, commodity.currency)}</span>
+                                    </div>
+                                    <div className={styles.candleInfoItem}>
+                                        <span className={styles.candleInfoLabel}>H:</span>
+                                        <span className={styles.candleInfoValue} style={{ color: '#10b981' }}>{formatCurrency(selectedCandle.high, commodity.currency)}</span>
+                                    </div>
+                                    <div className={styles.candleInfoItem}>
+                                        <span className={styles.candleInfoLabel}>L:</span>
+                                        <span className={styles.candleInfoValue} style={{ color: '#ef4444' }}>{formatCurrency(selectedCandle.low, commodity.currency)}</span>
+                                    </div>
+                                    <div className={styles.candleInfoItem}>
+                                        <span className={styles.candleInfoLabel}>C:</span>
+                                        <span className={styles.candleInfoValue}>{formatCurrency(selectedCandle.close, commodity.currency)}</span>
+                                    </div>
+                                    <div className={styles.candleInfoItem}>
+                                        <span className={styles.candleInfoLabel}>Vol:</span>
+                                        <span className={styles.candleInfoValue}>{selectedCandle.volume.toLocaleString()}</span>
+                                    </div>
+                                    {selectedCandle.rsi && (
+                                        <div className={styles.candleInfoItem}>
+                                            <span className={styles.candleInfoLabel}>RSI:</span>
+                                            <span className={styles.candleInfoValue} style={{ color: selectedCandle.rsi > 70 ? '#ef4444' : selectedCandle.rsi < 30 ? '#10b981' : '#e0e3eb' }}>
+                                                {selectedCandle.rsi.toFixed(1)}
+                                            </span>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <span>Click a candle to view details</span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right Sidebar - Stats & Info */}
+                    <div className={styles.rightSidebar}>
+                        <div className={styles.sidebarSection}>
+                            <div className={styles.sidebarTitle}>Statistics</div>
+                            <div className={styles.statsGrid}>
+                                <div className={styles.statItem}>
+                                    <span className={styles.statLabel}>High</span>
+                                    <span className={styles.statValue} style={{ color: '#10b981' }}>{formatCurrency(stats.high, commodity.currency)}</span>
+                                </div>
+                                <div className={styles.statItem}>
+                                    <span className={styles.statLabel}>Low</span>
+                                    <span className={styles.statValue} style={{ color: '#ef4444' }}>{formatCurrency(stats.low, commodity.currency)}</span>
+                                </div>
+                                <div className={styles.statItem}>
+                                    <span className={styles.statLabel}>Average</span>
+                                    <span className={styles.statValue}>{formatCurrency(stats.avg, commodity.currency)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={styles.sidebarSection}>
+                            <div className={styles.sidebarTitle}>Indicators</div>
+                            <div className={styles.statsGrid}>
+                                <div className={styles.statItem} onClick={() => toggleIndicator('sma20')} style={{ cursor: 'pointer', opacity: activeIndicators.sma20 ? 1 : 0.5 }}>
+                                    <span className={styles.statLabel}>SMA 20</span>
+                                    <span className={styles.statValue} style={{ color: '#f59e0b' }}>
+                                        {latestData.sma20 ? latestData.sma20.toFixed(2) : '-'}
+                                    </span>
+                                </div>
+                                <div className={styles.statItem} onClick={() => toggleIndicator('sma50')} style={{ cursor: 'pointer', opacity: activeIndicators.sma50 ? 1 : 0.5 }}>
+                                    <span className={styles.statLabel}>SMA 50</span>
+                                    <span className={styles.statValue} style={{ color: '#2962ff' }}>
+                                        {latestData.sma50 ? latestData.sma50.toFixed(2) : '-'}
+                                    </span>
+                                </div>
+                                <div className={styles.statItem} onClick={() => toggleIndicator('rsi')} style={{ cursor: 'pointer', opacity: activeIndicators.rsi ? 1 : 0.5 }}>
+                                    <span className={styles.statLabel}>RSI (14)</span>
+                                    <span className={styles.statValue} style={{ color: latestData.rsi && latestData.rsi > 70 ? '#ef4444' : latestData.rsi && latestData.rsi < 30 ? '#10b981' : '#e0e3eb' }}>
+                                        {latestData.rsi ? latestData.rsi.toFixed(1) : '-'}
+                                    </span>
+                                </div>
+                                <div className={styles.statItem} onClick={() => toggleIndicator('macd')} style={{ cursor: 'pointer', opacity: activeIndicators.macd ? 1 : 0.5 }}>
+                                    <span className={styles.statLabel}>MACD</span>
+                                    <span className={styles.statValue}>
+                                        {latestData.macd ? latestData.macd.toFixed(2) : '-'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {drawings.length > 0 && (
+                            <div className={styles.sidebarSection}>
+                                <div className={styles.sidebarTitle}>Drawings</div>
+                                <div className={styles.statsGrid}>
+                                    {drawings.map(drawing => (
+                                        <div key={drawing.id} className={styles.statItem} style={{ cursor: 'pointer' }} onClick={() => removeDrawing(drawing.id)}>
+                                            <span className={styles.statLabel} style={{ color: drawing.color }}>
+                                                {drawing.type === 'horizontal' && '─ Horizontal'}
+                                                {drawing.type === 'trendline' && '╱ Trendline'}
+                                                {drawing.type === 'fibonacci' && 'φ Fibonacci'}
+                                            </span>
+                                            <span className={styles.statValue} style={{ color: '#ef4444', fontSize: '14px' }}>×</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

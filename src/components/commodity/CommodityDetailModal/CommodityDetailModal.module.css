@@ -4,209 +4,344 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    padding: var(--spacing-md);
-    animation: fadeIn var(--transition-normal);
+    animation: fadeIn 0.2s;
 }
 
 .modal {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-    max-width: 1200px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: var(--spacing-xl);
-    animation: slideUp var(--transition-normal);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    background: #0a0e27;
+    border: 1px solid #1a1f3a;
+    border-radius: 8px;
+    width: 95vw;
+    height: 92vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
 }
 
+/* Header */
 .header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-xl);
-    padding-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-primary);
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #1a1f3a;
+    background: #0d1129;
 }
 
-.titleSection {
-    flex: 1;
-}
-
-.titleRow {
+.headerLeft {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
+    gap: 24px;
 }
 
-.icon {
-    font-size: var(--text-4xl);
+.headerTitle {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.title {
-    font-size: var(--text-3xl);
+.commodityName {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e0e3eb;
+    margin: 0;
+}
+
+.commodityMeta {
+    font-size: 11px;
+    color: #6b7280;
+    display: flex;
+    gap: 12px;
+}
+
+.priceInfo {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+}
+
+.currentPrice {
+    font-size: 32px;
     font-weight: 700;
-    color: var(--text-primary);
-    margin: 0;
+    color: #e0e3eb;
 }
 
-.subtitle {
-    font-size: var(--text-lg);
-    color: var(--text-muted);
-    margin: 0;
+.priceChange {
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.priceChange.positive {
+    color: #10b981;
+}
+
+.priceChange.negative {
+    color: #ef4444;
+}
+
+.dayRange {
+    font-size: 12px;
+    color: #9ca3af;
+    display: flex;
+    gap: 12px;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
 .closeButton {
     background: transparent;
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-md);
-    width: 40px;
-    height: 40px;
+    border: 1px solid #1a1f3a;
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: var(--text-secondary);
-    font-size: var(--text-xl);
-    transition: all var(--transition-fast);
+    color: #9ca3af;
+    font-size: 20px;
+    transition: all 0.2s;
 }
 
 .closeButton:hover {
-    background: var(--color-danger);
-    border-color: var(--color-danger);
+    background: #ef4444;
+    border-color: #ef4444;
     color: white;
-    transform: rotate(90deg);
 }
 
-.priceSection {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
-}
-
-.priceCard {
-    background: var(--bg-card);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-md);
-}
-
-.priceLabel {
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    margin-bottom: var(--spacing-xs);
-}
-
-.priceValue {
-    font-size: var(--text-2xl);
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
-}
-
-.priceChange {
-    font-size: var(--text-sm);
-    font-weight: 600;
+/* Main Content */
+.content {
     display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
+    flex: 1;
+    overflow: hidden;
 }
 
-.priceChange.positive {
-    color: var(--color-success);
+/* Left Sidebar */
+.leftSidebar {
+    width: 200px;
+    background: #0d1129;
+    border-right: 1px solid #1a1f3a;
+    padding: 16px;
+    overflow-y: auto;
 }
 
-.priceChange.negative {
-    color: var(--color-danger);
+.indicatorsList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.chartSection {
-    margin-bottom: var(--spacing-xl);
-}
-
-.chartHeader {
+.indicatorItem {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-lg);
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.chartTitle {
-    font-size: var(--text-xl);
+.indicatorItem:hover {
+    background: #1a1f3a;
+}
+
+.indicatorLabel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.indicatorColor {
+    width: 12px;
+    height: 2px;
+    border-radius: 1px;
+}
+
+.indicatorName {
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.indicatorValue {
+    color: #e0e3eb;
     font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
+}
+
+/* Chart Area */
+.chartArea {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #0a0e27;
+    overflow: hidden;
+}
+
+.chartControls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #1a1f3a;
+    background: #0d1129;
 }
 
 .timeRangeButtons {
     display: flex;
-    gap: var(--spacing-xs);
+    gap: 4px;
 }
 
 .timeRangeButton {
-    padding: var(--spacing-xs) var(--spacing-md);
+    padding: 6px 12px;
     background: transparent;
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    font-size: var(--text-sm);
+    border: 1px solid #1a1f3a;
+    border-radius: 4px;
+    color: #9ca3af;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s;
 }
 
 .timeRangeButton:hover {
-    border-color: var(--color-primary);
-    color: var(--text-primary);
+    border-color: #2962ff;
+    color: #e0e3eb;
 }
 
 .timeRangeButton.active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
+    background: #2962ff;
+    border-color: #2962ff;
     color: white;
 }
 
-.chartContainer {
-    background: var(--bg-card);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    min-height: 400px;
+.drawingTools {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
-.statsSection {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-md);
+.toolButton {
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px solid #1a1f3a;
+    border-radius: 4px;
+    color: #9ca3af;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.statCard {
-    background: var(--bg-card);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-md);
+.toolButton:hover {
+    border-color: #4b5563;
+    color: #e0e3eb;
+}
+
+.toolButton.active {
+    border-color: #2962ff;
+    background: rgba(41, 98, 255, 0.1);
+    color: #2962ff;
+}
+
+.chartWrapper {
+    flex: 1;
+    padding: 16px;
+    overflow: auto;
+}
+
+.candleInfo {
+    padding: 8px 16px;
+    background: #0d1129;
+    border-top: 1px solid #1a1f3a;
+    font-size: 11px;
+    color: #9ca3af;
+    display: flex;
+    gap: 16px;
+}
+
+.candleInfoItem {
+    display: flex;
+    gap: 4px;
+}
+
+.candleInfoLabel {
+    color: #6b7280;
+}
+
+.candleInfoValue {
+    color: #e0e3eb;
+    font-weight: 600;
+}
+
+/* Right Sidebar */
+.rightSidebar {
+    width: 280px;
+    background: #0d1129;
+    border-left: 1px solid #1a1f3a;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.sidebarSection {
+    margin-bottom: 24px;
+}
+
+.sidebarTitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.statsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.statItem {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    background: #0a0e27;
+    border-radius: 4px;
 }
 
 .statLabel {
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    margin-bottom: var(--spacing-xs);
+    font-size: 11px;
+    color: #6b7280;
 }
 
 .statValue {
-    font-size: var(--text-xl);
+    font-size: 12px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: #e0e3eb;
+}
+
+.categoryBadge {
+    padding: 4px 8px;
+    background: rgba(41, 98, 255, 0.1);
+    border: 1px solid rgba(41, 98, 255, 0.3);
+    border-radius: 4px;
+    font-size: 10px;
+    color: #2962ff;
+    font-weight: 600;
 }
 
 @keyframes fadeIn {
@@ -222,7 +357,7 @@
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(20px);
     }
 
     to {
@@ -231,25 +366,37 @@
     }
 }
 
-@media (max-width: 768px) {
-    .modal {
-        padding: var(--spacing-lg);
-        max-height: 95vh;
-    }
+/* Scrollbar Styling */
+.leftSidebar::-webkit-scrollbar,
+.rightSidebar::-webkit-scrollbar,
+.chartWrapper::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
 
-    .title {
-        font-size: var(--text-2xl);
-    }
+.leftSidebar::-webkit-scrollbar-track,
+.rightSidebar::-webkit-scrollbar-track,
+.chartWrapper::-webkit-scrollbar-track {
+    background: #0a0e27;
+}
 
-    .priceSection {
-        grid-template-columns: 1fr;
-    }
+.leftSidebar::-webkit-scrollbar-thumb,
+.rightSidebar::-webkit-scrollbar-thumb,
+.chartWrapper::-webkit-scrollbar-thumb {
+    background: #1a1f3a;
+    border-radius: 3px;
+}
 
-    .timeRangeButtons {
-        flex-wrap: wrap;
-    }
+.leftSidebar::-webkit-scrollbar-thumb:hover,
+.rightSidebar::-webkit-scrollbar-thumb:hover,
+.chartWrapper::-webkit-scrollbar-thumb:hover {
+    background: #2a2f4a;
+}
 
-    .chartContainer {
-        min-height: 300px;
+@media (max-width: 1024px) {
+
+    .leftSidebar,
+    .rightSidebar {
+        display: none;
     }
 }
