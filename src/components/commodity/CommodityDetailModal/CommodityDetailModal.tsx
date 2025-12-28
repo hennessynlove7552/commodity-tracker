@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, Line, ReferenceLine } from 'recharts';
-import { Commodity } from '@/types';
+import { Commodity, CommodityCategory } from '@/types';
 import { formatCurrency, formatPercent } from '@/utils/formatters';
 import styles from './CommodityDetailModal.module.css';
 
@@ -77,15 +77,23 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
         const data: ChartDataPoint[] = [];
 
         const basePrice = commodity.currentPrice;
-        const seed = commodity.id.charCodeAt(0) + commodity.id.charCodeAt(commodity.id.length - 1);
 
-        const volProfile: { [key: string]: number } = {
-            'ENERGY': 0.02,
-            'METALS': 0.012,
-            'AGRICULTURE': 0.015,
-            'DEFAULT': 0.01
+        // Use commodity ID and name for unique seed
+        const seed = commodity.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) +
+            commodity.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+        // Commodity-specific volatility profiles (more realistic)
+        const volProfile: { [key in CommodityCategory]: number } = {
+            [CommodityCategory.ENERGY]: 0.025,           // High volatility (oil, gas)
+            [CommodityCategory.PRECIOUS_METALS]: 0.012,  // Low volatility (gold, silver)
+            [CommodityCategory.INDUSTRIAL_METALS]: 0.018, // Medium volatility (copper, aluminum)
+            [CommodityCategory.AGRICULTURE]: 0.020,      // Medium-high volatility (wheat, corn)
         };
-        const baseVol = volProfile[commodity.category] || volProfile['DEFAULT'];
+        const baseVol = volProfile[commodity.category] || 0.015;
+
+        // Commodity-specific trend based on current change
+        const trendDirection = commodity.change >= 0 ? 1 : -1;
+        const trendStrength = Math.abs(commodity.changePercent) / 100;
 
         let seedState = seed;
         const random = () => {
@@ -100,14 +108,20 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
             return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
         };
 
+        // Generate price path that ends at current price
         const pathChanges: number[] = [];
         let currentVol = baseVol;
-        let trend = (random() - 0.5) * 0.005;
+        let trend = trendDirection * trendStrength * 0.01; // Use actual trend
 
         for (let i = 0; i < points; i++) {
-            if (random() < 0.05) currentVol = baseVol * (1 + random());
+            // Volatility regime switching
+            if (random() < 0.05) currentVol = baseVol * (0.8 + random() * 0.4);
             if (random() < 0.05) currentVol = baseVol;
-            if (random() < 0.1) trend = (random() - 0.5) * 0.005;
+
+            // Trend changes
+            if (random() < 0.08) {
+                trend = (random() - 0.5) * 0.008 + (trendDirection * trendStrength * 0.005);
+            }
 
             const drift = trend;
             const shock = randomNormal() * currentVol;
@@ -115,8 +129,9 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
             pathChanges.push(change);
         }
 
+        // Calculate starting price by working backwards from current price
         let startPrice = basePrice;
-        for (let i = 0; i < points; i++) {
+        for (let i = points - 1; i >= 0; i--) {
             startPrice /= (1 + pathChanges[i]);
         }
 
@@ -126,8 +141,13 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
             const date = new Date();
             date.setDate(date.getDate() - (points - 1 - i));
 
-            const changePct = pathChanges[points - 1 - i];
-            const currClose = currOpen * (1 + changePct);
+            const changePct = pathChanges[i];
+            let currClose = currOpen * (1 + changePct);
+
+            // Ensure the last candle closes exactly at current price
+            if (i === points - 1) {
+                currClose = basePrice;
+            }
 
             const bodyTop = Math.max(currOpen, currClose);
             const bodyBottom = Math.min(currOpen, currClose);
@@ -138,7 +158,10 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
             const validHigh = Math.max(high, bodyTop);
             const validLow = Math.min(low, bodyBottom);
 
-            const baseVolume = 100000;
+            // Volume varies by commodity category
+            const baseVolume = commodity.category === CommodityCategory.ENERGY ? 200000 :
+                commodity.category === CommodityCategory.PRECIOUS_METALS ? 120000 :
+                    commodity.category === CommodityCategory.INDUSTRIAL_METALS ? 150000 : 100000;
             const volumeSpike = Math.abs(changePct) > currentVol ? 2.5 : 1;
             const volume = Math.floor(baseVolume * (0.8 + random() * 0.4) * volumeSpike);
 
