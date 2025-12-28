@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, Line } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, Line, ReferenceLine } from 'recharts';
 import { Commodity } from '@/types';
 import { formatCurrency, formatPercent } from '@/utils/formatters';
 import styles from './CommodityDetailModal.module.css';
@@ -21,49 +21,62 @@ interface ChartDataPoint {
     fill: string;
     sma20?: number | null;
     sma50?: number | null;
+    ema12?: number | null;
+    ema26?: number | null;
     bbUpper?: number | null;
     bbMiddle?: number | null;
     bbLower?: number | null;
+    rsi?: number | null;
+    macd?: number | null;
+    macdSignal?: number | null;
+    macdHistogram?: number | null;
+    atr?: number | null;
 }
 
 export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ commodity, onClose }) => {
     const [timeRange, setTimeRange] = useState<TimeRange>('1M');
+    const [activeIndicators, setActiveIndicators] = useState({
+        sma20: true,
+        sma50: true,
+        ema12: false,
+        ema26: false,
+        bb: true,
+        rsi: true,
+        macd: true,
+        atr: false,
+    });
 
     // Advanced Market Data Simulation Engine (Institutional Grade)
     const chartData = useMemo(() => {
         const dataPoints: { [key in TimeRange]: number } = {
-            '1D': 24, // Hourly for 1D? Simplified to daily points for now to maintain consistency
+            '1D': 24,
             '1W': 14,
             '1M': 30,
             '3M': 90,
-            '1Y': 250, // Trading days approx
+            '1Y': 250,
             'ALL': 500,
         };
 
         const points = dataPoints[timeRange];
         const data: ChartDataPoint[] = [];
 
-        // 1. Volatility & Market Regime Configuration
         const basePrice = commodity.currentPrice;
         const seed = commodity.id.charCodeAt(0) + commodity.id.charCodeAt(commodity.id.length - 1);
 
-        // Commodity specific volatility profile
         const volProfile: { [key: string]: number } = {
-            'ENERGY': 0.02,     // High vol
-            'METALS': 0.012,    // Medium vol
+            'ENERGY': 0.02,
+            'METALS': 0.012,
             'AGRICULTURE': 0.015,
             'DEFAULT': 0.01
         };
         const baseVol = volProfile[commodity.category] || volProfile['DEFAULT'];
 
-        // Pseudo-random number generator with seed
         let seedState = seed;
         const random = () => {
             const x = Math.sin(seedState++) * 10000;
             return x - Math.floor(x);
         };
 
-        // Box-Muller transform for normal distribution
         const randomNormal = () => {
             let u = 0, v = 0;
             while (u === 0) u = random();
@@ -71,17 +84,13 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
             return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
         };
 
-        // 2. Trend & Momentum Generation
         const pathChanges: number[] = [];
         let currentVol = baseVol;
-        let trend = (random() - 0.5) * 0.005; // Initial small trend
+        let trend = (random() - 0.5) * 0.005;
 
         for (let i = 0; i < points; i++) {
-            // Regime switching
             if (random() < 0.05) currentVol = baseVol * (1 + random());
             if (random() < 0.05) currentVol = baseVol;
-
-            // Trend evolution
             if (random() < 0.1) trend = (random() - 0.5) * 0.005;
 
             const drift = trend;
@@ -134,7 +143,9 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
             currOpen = currClose;
         }
 
-        // 3. Technical Indicators Calculation
+        // Technical Indicators Calculation
+
+        // SMA
         const calculateSMA = (period: number) => {
             const sma = [];
             for (let i = 0; i < data.length; i++) {
@@ -151,10 +162,171 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
             return sma;
         };
 
+        // EMA
+        const calculateEMA = (period: number): (number | null)[] => {
+            const ema: (number | null)[] = [];
+            const multiplier = 2 / (period + 1);
+
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) {
+                    ema.push(null);
+                } else if (i === period - 1) {
+                    // First EMA = SMA
+                    let sum = 0;
+                    for (let j = 0; j < period; j++) {
+                        sum += data[i - j].close;
+                    }
+                    ema.push(Number((sum / period).toFixed(2)));
+                } else {
+                    const prevEma: number = ema[i - 1] as number;
+                    const newEma: number = (data[i].close - prevEma) * multiplier + prevEma;
+                    ema.push(Number(newEma.toFixed(2)));
+                }
+            }
+            return ema;
+        };
+
+        // RSI
+        const calculateRSI = (period: number = 14): (number | null)[] => {
+            const rsi: (number | null)[] = [];
+            const gains: number[] = [];
+            const losses: number[] = [];
+
+            for (let i = 0; i < data.length; i++) {
+                if (i === 0) {
+                    gains.push(0);
+                    losses.push(0);
+                    rsi.push(null);
+                    continue;
+                }
+
+                const change = data[i].close - data[i - 1].close;
+                gains.push(change > 0 ? change : 0);
+                losses.push(change < 0 ? Math.abs(change) : 0);
+
+                if (i < period) {
+                    rsi.push(null);
+                } else if (i === period) {
+                    const avgGain = gains.slice(1, period + 1).reduce((a, b) => a + b, 0) / period;
+                    const avgLoss = losses.slice(1, period + 1).reduce((a, b) => a + b, 0) / period;
+                    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+                    rsi.push(Number((100 - (100 / (1 + rs))).toFixed(2)));
+                } else {
+                    const prevRSI: number | null = rsi[i - 1];
+                    if (prevRSI === null) {
+                        rsi.push(null);
+                        continue;
+                    }
+
+                    const prevAvgGain: number = ((100 - prevRSI) !== 0) ? (prevRSI * (period - 1) / (100 - prevRSI)) / (period - 1) : 0;
+                    const prevAvgLoss: number = prevAvgGain !== 0 ? prevAvgGain * (100 / prevRSI - 1) : 0;
+
+                    const avgGain: number = (prevAvgGain * (period - 1) + gains[i]) / period;
+                    const avgLoss: number = (prevAvgLoss * (period - 1) + losses[i]) / period;
+
+                    const rs: number = avgLoss === 0 ? 100 : avgGain / avgLoss;
+                    rsi.push(Number((100 - (100 / (1 + rs))).toFixed(2)));
+                }
+            }
+            return rsi;
+        };
+
+        // MACD
+        const calculateMACD = () => {
+            const ema12 = calculateEMA(12);
+            const ema26 = calculateEMA(26);
+            const macdLine = [];
+
+            for (let i = 0; i < data.length; i++) {
+                if (ema12[i] === null || ema26[i] === null) {
+                    macdLine.push(null);
+                } else {
+                    macdLine.push(Number((ema12[i]! - ema26[i]!).toFixed(2)));
+                }
+            }
+
+            // Signal line (9-period EMA of MACD)
+            const signalLine: (number | null)[] = [];
+            const signalPeriod = 9;
+            const multiplier = 2 / (signalPeriod + 1);
+
+            for (let i = 0; i < macdLine.length; i++) {
+                if (macdLine[i] === null) {
+                    signalLine.push(null);
+                } else if (i < 25 + signalPeriod - 1) {
+                    signalLine.push(null);
+                } else if (i === 25 + signalPeriod - 1) {
+                    let sum = 0;
+                    let count = 0;
+                    for (let j = 0; j < signalPeriod; j++) {
+                        if (macdLine[i - j] !== null) {
+                            sum += macdLine[i - j]!;
+                            count++;
+                        }
+                    }
+                    signalLine.push(count > 0 ? Number((sum / count).toFixed(2)) : null);
+                } else {
+                    const prevSignal: number | null = signalLine[i - 1];
+                    if (prevSignal === null) {
+                        signalLine.push(null);
+                    } else {
+                        const newSignal: number = (macdLine[i]! - prevSignal) * multiplier + prevSignal;
+                        signalLine.push(Number(newSignal.toFixed(2)));
+                    }
+                }
+            }
+
+            // Histogram
+            const histogram = macdLine.map((macd, i) => {
+                if (macd === null || signalLine[i] === null) return null;
+                return Number((macd - signalLine[i]!).toFixed(2));
+            });
+
+            return { macdLine, signalLine, histogram };
+        };
+
+        // ATR (Average True Range)
+        const calculateATR = (period: number = 14) => {
+            const trueRanges = [];
+
+            for (let i = 0; i < data.length; i++) {
+                if (i === 0) {
+                    trueRanges.push(data[i].high - data[i].low);
+                } else {
+                    const tr = Math.max(
+                        data[i].high - data[i].low,
+                        Math.abs(data[i].high - data[i - 1].close),
+                        Math.abs(data[i].low - data[i - 1].close)
+                    );
+                    trueRanges.push(tr);
+                }
+            }
+
+            const atr = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) {
+                    atr.push(null);
+                } else if (i === period - 1) {
+                    const sum = trueRanges.slice(0, period).reduce((a, b) => a + b, 0);
+                    atr.push(Number((sum / period).toFixed(2)));
+                } else {
+                    const prevATR: number = atr[i - 1] as number;
+                    const newATR: number = (prevATR * (period - 1) + trueRanges[i]) / period;
+                    atr.push(Number(newATR.toFixed(2)));
+                }
+            }
+            return atr;
+        };
+
         const sma20 = calculateSMA(20);
         const sma50 = calculateSMA(50);
+        const ema12 = calculateEMA(12);
+        const ema26 = calculateEMA(26);
+        const rsi = calculateRSI(14);
+        const { macdLine, signalLine, histogram } = calculateMACD();
+        const atr = calculateATR(14);
 
-        // Bollinger Bands (20, 2)
+        // Bollinger Bands
         const bb = data.map((_, i) => {
             if (i < 19) return { upper: null, middle: null, lower: null };
             const slice = data.slice(i - 19, i + 1).map(x => x.close);
@@ -171,9 +343,16 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
         data.forEach((d, i) => {
             d.sma20 = sma20[i];
             d.sma50 = sma50[i];
+            d.ema12 = ema12[i];
+            d.ema26 = ema26[i];
             d.bbUpper = bb[i].upper;
             d.bbMiddle = bb[i].middle;
             d.bbLower = bb[i].lower;
+            d.rsi = rsi[i];
+            d.macd = macdLine[i];
+            d.macdSignal = signalLine[i];
+            d.macdHistogram = histogram[i];
+            d.atr = atr[i];
         });
 
         return data;
@@ -196,6 +375,13 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
 
     const handleOverlayClick = (e: React.MouseEvent) => {
         if (e.target === e.currentTarget) onClose();
+    };
+
+    const toggleIndicator = (indicator: keyof typeof activeIndicators) => {
+        setActiveIndicators(prev => ({
+            ...prev,
+            [indicator]: !prev[indicator]
+        }));
     };
 
     return (
@@ -257,10 +443,47 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                                 </button>
                             ))}
                         </div>
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '11px', alignItems: 'center' }}>
-                            <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center' }}><span style={{ width: 8, height: 2, background: '#f59e0b', marginRight: 4 }}></span>SMA 20</span>
-                            <span style={{ color: '#2962ff', display: 'flex', alignItems: 'center' }}><span style={{ width: 8, height: 2, background: '#2962ff', marginRight: 4 }}></span>SMA 50</span>
-                            <span style={{ color: 'rgba(38, 166, 154, 0.3)', display: 'flex', alignItems: 'center' }}><span style={{ width: 8, height: 10, background: 'rgba(38, 166, 154, 0.3)', border: '1px solid #26a69a', marginRight: 4 }}></span>BB</span>
+                        <div style={{ display: 'flex', gap: '8px', fontSize: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <button onClick={() => toggleIndicator('sma20')} style={{
+                                background: activeIndicators.sma20 ? '#f59e0b20' : 'transparent',
+                                color: activeIndicators.sma20 ? '#f59e0b' : '#666',
+                                border: `1px solid ${activeIndicators.sma20 ? '#f59e0b' : '#444'}`,
+                                borderRadius: '3px',
+                                padding: '2px 6px',
+                                cursor: 'pointer'
+                            }}>SMA20</button>
+                            <button onClick={() => toggleIndicator('sma50')} style={{
+                                background: activeIndicators.sma50 ? '#2962ff20' : 'transparent',
+                                color: activeIndicators.sma50 ? '#2962ff' : '#666',
+                                border: `1px solid ${activeIndicators.sma50 ? '#2962ff' : '#444'}`,
+                                borderRadius: '3px',
+                                padding: '2px 6px',
+                                cursor: 'pointer'
+                            }}>SMA50</button>
+                            <button onClick={() => toggleIndicator('ema12')} style={{
+                                background: activeIndicators.ema12 ? '#10b98120' : 'transparent',
+                                color: activeIndicators.ema12 ? '#10b981' : '#666',
+                                border: `1px solid ${activeIndicators.ema12 ? '#10b981' : '#444'}`,
+                                borderRadius: '3px',
+                                padding: '2px 6px',
+                                cursor: 'pointer'
+                            }}>EMA12</button>
+                            <button onClick={() => toggleIndicator('ema26')} style={{
+                                background: activeIndicators.ema26 ? '#ec489920' : 'transparent',
+                                color: activeIndicators.ema26 ? '#ec4899' : '#666',
+                                border: `1px solid ${activeIndicators.ema26 ? '#ec4899' : '#444'}`,
+                                borderRadius: '3px',
+                                padding: '2px 6px',
+                                cursor: 'pointer'
+                            }}>EMA26</button>
+                            <button onClick={() => toggleIndicator('bb')} style={{
+                                background: activeIndicators.bb ? '#26a69a20' : 'transparent',
+                                color: activeIndicators.bb ? '#26a69a' : '#666',
+                                border: `1px solid ${activeIndicators.bb ? '#26a69a' : '#444'}`,
+                                borderRadius: '3px',
+                                padding: '2px 6px',
+                                cursor: 'pointer'
+                            }}>BB</button>
                         </div>
                     </div>
 
@@ -288,13 +511,15 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                                 <span>종 <span style={{ color: selectedCandle.close >= selectedCandle.open ? '#10b981' : '#ef4444' }}>{formatCurrency(selectedCandle.close, commodity.currency)}</span></span>
                                 <div style={{ width: '1px', height: '12px', backgroundColor: '#333' }}></div>
                                 <span>Vol <span style={{ color: '#fff' }}>{selectedCandle.volume.toLocaleString()}</span></span>
+                                {selectedCandle.rsi && <span>RSI <span style={{ color: selectedCandle.rsi > 70 ? '#ef4444' : selectedCandle.rsi < 30 ? '#10b981' : '#fff' }}>{selectedCandle.rsi.toFixed(1)}</span></span>}
                             </>
                         ) : (
                             <span>차트의 캔들을 클릭하여 상세 정보를 확인하세요.</span>
                         )}
                     </div>
 
-                    <div style={{ height: 400, width: '100%', position: 'relative' }}>
+                    {/* Main Price Chart */}
+                    <div style={{ height: 350, width: '100%', position: 'relative' }}>
                         <ResponsiveContainer>
                             <ComposedChart
                                 data={chartData}
@@ -336,11 +561,17 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                                     }}
                                 />
 
-                                <Line type="monotone" dataKey="bbUpper" stroke="#26a69a" strokeOpacity={0.2} dot={false} strokeWidth={1} isAnimationActive={false} />
-                                <Line type="monotone" dataKey="bbLower" stroke="#26a69a" strokeOpacity={0.2} dot={false} strokeWidth={1} isAnimationActive={false} />
+                                {activeIndicators.bb && (
+                                    <>
+                                        <Line type="monotone" dataKey="bbUpper" stroke="#26a69a" strokeOpacity={0.2} dot={false} strokeWidth={1} isAnimationActive={false} />
+                                        <Line type="monotone" dataKey="bbLower" stroke="#26a69a" strokeOpacity={0.2} dot={false} strokeWidth={1} isAnimationActive={false} />
+                                    </>
+                                )}
 
-                                <Line type="monotone" dataKey="sma50" stroke="#2962ff" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls />
-                                <Line type="monotone" dataKey="sma20" stroke="#f59e0b" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls />
+                                {activeIndicators.sma50 && <Line type="monotone" dataKey="sma50" stroke="#2962ff" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls />}
+                                {activeIndicators.sma20 && <Line type="monotone" dataKey="sma20" stroke="#f59e0b" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls />}
+                                {activeIndicators.ema12 && <Line type="monotone" dataKey="ema12" stroke="#10b981" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls strokeDasharray="3 3" />}
+                                {activeIndicators.ema26 && <Line type="monotone" dataKey="ema26" stroke="#ec4899" dot={false} strokeWidth={1.5} isAnimationActive={false} connectNulls strokeDasharray="3 3" />}
 
                                 <Bar
                                     dataKey={(entry: ChartDataPoint) => [entry.low, entry.high]}
@@ -390,29 +621,23 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                         </ResponsiveContainer>
                     </div>
 
-                    <div className={styles.volumeChart} style={{ marginTop: '16px' }}>
+                    {/* Volume Chart */}
+                    <div style={{ marginTop: '16px' }}>
+                        <div style={{ fontSize: '10px', color: '#888', marginBottom: '4px', paddingLeft: '8px' }}>거래량 (Volume)</div>
                         <ResponsiveContainer width="100%" height={80}>
-                            <ComposedChart data={chartData} margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" opacity={0.3} />
-                                <XAxis
-                                    dataKey="date"
-                                    stroke="#666"
-                                    style={{ fontSize: '10px' }}
-                                    tick={{ fill: '#888' }}
-                                    hide
-                                />
+                            <ComposedChart data={chartData} margin={{ top: 0, right: 5, left: 5, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" opacity={0.3} vertical={false} />
+                                <XAxis dataKey="date" hide />
                                 <YAxis
-                                    stroke="#666"
-                                    style={{ fontSize: '9px' }}
-                                    tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
-                                    tick={{ fill: '#888' }}
                                     orientation="right"
+                                    tick={{ fill: '#666', fontSize: 9 }}
+                                    tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
                                     width={40}
+                                    axisLine={false}
+                                    tickLine={false}
                                 />
                                 <Bar
                                     dataKey="volume"
-                                    fill="#06b6d4"
-                                    opacity={0.5}
                                     isAnimationActive={false}
                                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                     shape={(props: any) => {
@@ -433,10 +658,100 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                                 />
                             </ComposedChart>
                         </ResponsiveContainer>
-                        <div style={{ fontSize: '10px', color: '#888', marginTop: '4px', textAlign: 'center' }}>
-                            거래량 (Volume)
-                        </div>
                     </div>
+
+                    {/* RSI Panel */}
+                    {activeIndicators.rsi && (
+                        <div style={{ marginTop: '16px' }}>
+                            <div style={{ fontSize: '10px', color: '#888', marginBottom: '4px', paddingLeft: '8px' }}>RSI (14)</div>
+                            <ResponsiveContainer width="100%" height={100}>
+                                <ComposedChart data={chartData} margin={{ top: 0, right: 5, left: 5, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" opacity={0.3} vertical={false} />
+                                    <XAxis dataKey="date" hide />
+                                    <YAxis
+                                        orientation="right"
+                                        domain={[0, 100]}
+                                        ticks={[30, 50, 70]}
+                                        tick={{ fill: '#666', fontSize: 9 }}
+                                        width={40}
+                                        axisLine={false}
+                                        tickLine={false}
+                                    />
+                                    <ReferenceLine y={70} stroke="#ef4444" strokeDasharray="3 3" opacity={0.5} />
+                                    <ReferenceLine y={50} stroke="#666" strokeDasharray="3 3" opacity={0.3} />
+                                    <ReferenceLine y={30} stroke="#10b981" strokeDasharray="3 3" opacity={0.5} />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="rsi"
+                                        stroke="#9333ea"
+                                        dot={false}
+                                        strokeWidth={1.5}
+                                        isAnimationActive={false}
+                                        connectNulls
+                                    />
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+
+                    {/* MACD Panel */}
+                    {activeIndicators.macd && (
+                        <div style={{ marginTop: '16px' }}>
+                            <div style={{ fontSize: '10px', color: '#888', marginBottom: '4px', paddingLeft: '8px' }}>MACD (12, 26, 9)</div>
+                            <ResponsiveContainer width="100%" height={100}>
+                                <ComposedChart data={chartData} margin={{ top: 0, right: 5, left: 5, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" opacity={0.3} vertical={false} />
+                                    <XAxis dataKey="date" hide />
+                                    <YAxis
+                                        orientation="right"
+                                        tick={{ fill: '#666', fontSize: 9 }}
+                                        width={40}
+                                        axisLine={false}
+                                        tickLine={false}
+                                    />
+                                    <ReferenceLine y={0} stroke="#666" strokeDasharray="3 3" opacity={0.5} />
+                                    <Bar
+                                        dataKey="macdHistogram"
+                                        isAnimationActive={false}
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        shape={(props: any) => {
+                                            const { x, y, width, height, payload } = props;
+                                            if (!payload || payload.macdHistogram === null) return <g />;
+                                            const color = payload.macdHistogram >= 0 ? '#26a69a' : '#ef5350';
+                                            return (
+                                                <rect
+                                                    x={x}
+                                                    y={y}
+                                                    width={width}
+                                                    height={height}
+                                                    fill={color}
+                                                    opacity={0.6}
+                                                />
+                                            );
+                                        }}
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="macd"
+                                        stroke="#2196f3"
+                                        dot={false}
+                                        strokeWidth={1.5}
+                                        isAnimationActive={false}
+                                        connectNulls
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="macdSignal"
+                                        stroke="#ff9800"
+                                        dot={false}
+                                        strokeWidth={1.5}
+                                        isAnimationActive={false}
+                                        connectNulls
+                                    />
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
