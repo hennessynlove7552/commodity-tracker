@@ -638,6 +638,13 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                                     data={chartData}
                                     margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
                                     onClick={handleChartClick}
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    onMouseMove={(e: any) => {
+                                        if (e && e.activePayload && e.activePayload.length > 0) {
+                                            setSelectedCandle(e.activePayload[0].payload as ChartDataPoint);
+                                        }
+                                    }}
+                                    onMouseLeave={() => setSelectedCandle(null)}
                                 >
                                     <CartesianGrid stroke="#1a1f3a" strokeDasharray="3 3" vertical={false} />
                                     <XAxis
