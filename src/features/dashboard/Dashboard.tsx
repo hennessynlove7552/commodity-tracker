@@ -3,6 +3,7 @@ import { useCommodities } from '@/hooks/useCommodities';
 import { useWatchlistStore } from '@/store/watchlistStore';
 import { CommodityGrid } from '@/components/commodity/CommodityGrid';
 import { CommodityDetailModal } from '@/components/commodity/CommodityDetailModal';
+import { NewsSection } from '@/components/news';
 import { Loading } from '@/components/common/Loading';
 import { CATEGORY_LABELS } from '@/utils/constants';
 import { PreciousMetalsSubcategory, EnergySubcategory, IndustrialMetalsSubcategory, AgriculturalSubcategory, Commodity } from '@/types';
@@ -35,6 +36,7 @@ const SUBCATEGORY_LABELS = {
 };
 
 export const Dashboard: React.FC = () => {
+    const [activeTab, setActiveTab] = useState<'prices' | 'news'>('prices');
     const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
     const [selectedSubcategory, setSelectedSubcategory] = useState<string>('ALL');
     const [searchQuery, setSearchQuery] = useState('');
@@ -114,108 +116,130 @@ export const Dashboard: React.FC = () => {
                     <p className={styles.subtitle}>
                         실시간 원자재 가격 정보를 확인하세요
                     </p>
+
+                    {/* Tab Navigation */}
+                    <div className={styles.tabs}>
+                        <button
+                            className={`${styles.tab} ${activeTab === 'prices' ? styles.activeTab : ''}`}
+                            onClick={() => setActiveTab('prices')}
+                        >
+                            💰 가격
+                        </button>
+                        <button
+                            className={`${styles.tab} ${activeTab === 'news' ? styles.activeTab : ''}`}
+                            onClick={() => setActiveTab('news')}
+                        >
+                            📰 뉴스
+                        </button>
+                    </div>
                 </header>
 
-                {/* Stats */}
-                <div className={styles.stats}>
-                    <div className={styles.statCard}>
-                        <div className={styles.statLabel}>전체 원자재</div>
-                        <div className={styles.statValue}>{stats.total}</div>
-                    </div>
-                    <div className={styles.statCard}>
-                        <div className={styles.statLabel}>상승</div>
-                        <div className={styles.statValue} style={{ color: 'var(--color-success)' }}>
-                            {stats.gainers}
+                {activeTab === 'prices' ? (
+                    <>
+                        {/* Stats */}
+                        <div className={styles.stats}>
+                            <div className={styles.statCard}>
+                                <div className={styles.statLabel}>전체 원자재</div>
+                                <div className={styles.statValue}>{stats.total}</div>
+                            </div>
+                            <div className={styles.statCard}>
+                                <div className={styles.statLabel}>상승</div>
+                                <div className={styles.statValue} style={{ color: 'var(--color-success)' }}>
+                                    {stats.gainers}
+                                </div>
+                            </div>
+                            <div className={styles.statCard}>
+                                <div className={styles.statLabel}>하락</div>
+                                <div className={styles.statValue} style={{ color: 'var(--color-danger)' }}>
+                                    {stats.losers}
+                                </div>
+                            </div>
+                            <div className={styles.statCard}>
+                                <div className={styles.statLabel}>관심 목록</div>
+                                <div className={styles.statValue} style={{ color: 'var(--color-warning)' }}>
+                                    {watchlist.length}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div className={styles.statCard}>
-                        <div className={styles.statLabel}>하락</div>
-                        <div className={styles.statValue} style={{ color: 'var(--color-danger)' }}>
-                            {stats.losers}
-                        </div>
-                    </div>
-                    <div className={styles.statCard}>
-                        <div className={styles.statLabel}>관심 목록</div>
-                        <div className={styles.statValue} style={{ color: 'var(--color-warning)' }}>
-                            {watchlist.length}
-                        </div>
-                    </div>
-                </div>
 
-                {/* Controls */}
-                <div className={styles.controls}>
-                    <div className={styles.searchBar}>
-                        <input
-                            type="text"
-                            className={styles.searchInput}
-                            placeholder="원자재 검색... (예: 금, Gold, XAUUSD)"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
+                        {/* Controls */}
+                        <div className={styles.controls}>
+                            <div className={styles.searchBar}>
+                                <input
+                                    type="text"
+                                    className={styles.searchInput}
+                                    placeholder="원자재 검색... (예: 금, Gold, XAUUSD)"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
 
-                    {/* Main Category Filters */}
-                    <div className={styles.filters}>
-                        <button
-                            className={`${styles.filterBtn} ${selectedCategory === 'ALL' ? styles.active : ''}`}
-                            onClick={() => handleCategoryChange('ALL')}
-                        >
-                            전체
-                        </button>
-                        {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                            <button
-                                key={key}
-                                className={`${styles.filterBtn} ${selectedCategory === key ? styles.active : ''}`}
-                                onClick={() => handleCategoryChange(key)}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Subcategory Filters */}
-                    {availableSubcategories.length > 0 && (
-                        <div className={styles.subFilters}>
-                            <span className={styles.subFilterLabel}>세부 분류:</span>
-                            <button
-                                className={`${styles.subFilterBtn} ${selectedSubcategory === 'ALL' ? styles.active : ''}`}
-                                onClick={() => setSelectedSubcategory('ALL')}
-                            >
-                                전체
-                            </button>
-                            {availableSubcategories.map((subcat) => (
+                            {/* Main Category Filters */}
+                            <div className={styles.filters}>
                                 <button
-                                    key={subcat}
-                                    className={`${styles.subFilterBtn} ${selectedSubcategory === subcat ? styles.active : ''}`}
-                                    onClick={() => setSelectedSubcategory(subcat)}
+                                    className={`${styles.filterBtn} ${selectedCategory === 'ALL' ? styles.active : ''}`}
+                                    onClick={() => handleCategoryChange('ALL')}
                                 >
-                                    {SUBCATEGORY_LABELS[subcat as keyof typeof SUBCATEGORY_LABELS] || subcat}
+                                    전체
                                 </button>
-                            ))}
+                                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                                    <button
+                                        key={key}
+                                        className={`${styles.filterBtn} ${selectedCategory === key ? styles.active : ''}`}
+                                        onClick={() => handleCategoryChange(key)}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Subcategory Filters */}
+                            {availableSubcategories.length > 0 && (
+                                <div className={styles.subFilters}>
+                                    <span className={styles.subFilterLabel}>세부 분류:</span>
+                                    <button
+                                        className={`${styles.subFilterBtn} ${selectedSubcategory === 'ALL' ? styles.active : ''}`}
+                                        onClick={() => setSelectedSubcategory('ALL')}
+                                    >
+                                        전체
+                                    </button>
+                                    {availableSubcategories.map((subcat) => (
+                                        <button
+                                            key={subcat}
+                                            className={`${styles.subFilterBtn} ${selectedSubcategory === subcat ? styles.active : ''}`}
+                                            onClick={() => setSelectedSubcategory(subcat)}
+                                        >
+                                            {SUBCATEGORY_LABELS[subcat as keyof typeof SUBCATEGORY_LABELS] || subcat}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
 
-                {/* Results count */}
-                <div className={styles.resultsInfo}>
-                    <span>{filteredCommodities.length}개의 원자재</span>
-                    {selectedSubcategory !== 'ALL' && (
-                        <span className={styles.activeFilter}>
-                            {' · '}{SUBCATEGORY_LABELS[selectedSubcategory as keyof typeof SUBCATEGORY_LABELS]}
-                        </span>
-                    )}
-                </div>
+                        {/* Results count */}
+                        <div className={styles.resultsInfo}>
+                            <span>{filteredCommodities.length}개의 원자재</span>
+                            {selectedSubcategory !== 'ALL' && (
+                                <span className={styles.activeFilter}>
+                                    {' · '}{SUBCATEGORY_LABELS[selectedSubcategory as keyof typeof SUBCATEGORY_LABELS]}
+                                </span>
+                            )}
+                        </div>
 
-                {/* Commodity Grid */}
-                <CommodityGrid
-                    commodities={filteredCommodities}
-                    watchlist={watchlist}
-                    onToggleWatchlist={toggleWatchlist}
-                    onClick={(id: string) => {
-                        const commodity = filteredCommodities.find(c => c.id === id);
-                        if (commodity) setSelectedCommodity(commodity);
-                    }}
-                />
+                        {/* Commodity Grid */}
+                        <CommodityGrid
+                            commodities={filteredCommodities}
+                            watchlist={watchlist}
+                            onToggleWatchlist={toggleWatchlist}
+                            onClick={(id: string) => {
+                                const commodity = filteredCommodities.find(c => c.id === id);
+                                if (commodity) setSelectedCommodity(commodity);
+                            }}
+                        />
+                    </>
+                ) : (
+                    <NewsSection />
+                )}
 
                 {selectedCommodity && (
                     <CommodityDetailModal

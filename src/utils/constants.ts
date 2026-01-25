@@ -1,4 +1,4 @@
-import { Commodity, CommodityCategory, PreciousMetalsSubcategory, EnergySubcategory, IndustrialMetalsSubcategory, AgriculturalSubcategory } from '@/types';
+import { Commodity, CommodityCategory, PreciousMetalsSubcategory, EnergySubcategory, IndustrialMetalsSubcategory, AgriculturalSubcategory, NewsArticle } from '@/types';
 
 /**
  * Mock commodity data for development
@@ -1020,3 +1020,98 @@ export const TIMEFRAME_OPTIONS = [
     { value: '1Y', label: '1년' },
     { value: 'ALL', label: '전체' },
 ] as const;
+
+
+/**
+ * Mock news data for development
+ */
+export const MOCK_NEWS: NewsArticle[] = [
+    {
+        id: 'news-1',
+        title: '금 가격, 사상 최고치 경신... 지정학적 리스크 확대',
+        summary: '금 가격이 온스당 $4,500을 돌파하며 역대 최고가를 기록했습니다. 중동 긴장 고조와 미 연준의 금리 인하 기대감이 안전자산 수요를 증가시켰습니다.',
+        url: 'https://example.com/news/gold-all-time-high',
+        source: 'Bloomberg',
+        publishedAt: new Date('2026-01-25T08:00:00'),
+        relatedCommodities: ['1'], // Gold
+        imageUrl: 'https://images.unsplash.com/photo-1610375461369-d1eb4f8c446f?w=800',
+        sentiment: 'positive'
+    },
+    {
+        id: 'news-2',
+        title: '은 시장 급등세, 산업 수요 증가와 공급 부족 우려',
+        summary: '은 가격이 온스당 $79를 돌파하며 10년 만에 최고치를 기록했습니다. 태양광 패널과 전기차 배터리 수요 급증이 주요 원인으로 분석됩니다.',
+        url: 'https://example.com/news/silver-supply-shortage',
+        source: 'Reuters',
+        publishedAt: new Date('2026-01-24T14:30:00'),
+        relatedCommodities: ['2'], // Silver
+        imageUrl: 'https://images.unsplash.com/photo-1594980596870-0081324648e8?w=800',
+        sentiment: 'positive'
+    },
+    {
+        id: 'news-3',
+        title: 'WTI 원유, 공급 과잉 우려로 $57선 하락',
+        summary: 'OPEC+ 증산 결정과 글로벌 경기 둔화 우려로 원유 가격이 배럴당 $56.74까지 하락했습니다. 애널리스트들은 추가 하락 가능성을 경고하고 있습니다.',
+        url: 'https://example.com/news/wti-oil-decline',
+        source: 'CNBC',
+        publishedAt: new Date('2026-01-24T10:15:00'),
+        relatedCommodities: ['4', '5'], // WTI, Brent
+        imageUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800',
+        sentiment: 'negative'
+    },
+    {
+        id: 'news-4',
+        title: '천연가스 가격 급등, 겨울 한파로 수요 폭증',
+        summary: '북미와 유럽의 기록적 한파로 천연가스 수요가 급증하며 가격이 30% 이상 상승했습니다. 에너지 전문가들은 재고 부족 우려를 제기하고 있습니다.',
+        url: 'https://example.com/news/natural-gas-winter-demand',
+        source: 'Financial Times',
+        publishedAt: new Date('2026-01-23T16:45:00'),
+        relatedCommodities: ['14', '15'], // Natural Gas, Henry Hub
+        imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800',
+        sentiment: 'positive'
+    },
+    {
+        id: 'news-5',
+        title: '구리 가격 강세 지속, 친환경 에너지 전환 수혜',
+        summary: '전기차와 재생에너지 인프라 구축 붐으로 구리 수요가 급증하고 있습니다. 주요 광산의 생산 차질로 공급 부족 우려가 확대되고 있습니다.',
+        url: 'https://example.com/news/copper-green-energy',
+        source: 'WSJ',
+        publishedAt: new Date('2026-01-23T09:20:00'),
+        relatedCommodities: ['copper'], // Copper (ID 확인 필요)
+        imageUrl: 'https://images.unsplash.com/photo-1589254065878-42c9da997008?w=800',
+        sentiment: 'positive'
+    },
+    {
+        id: 'news-6',
+        title: '밀 가격 하락세, 풍작 전망과 수요 감소',
+        summary: '주요 생산국들의 밀 생산량 증가 전망과 글로벌 수요 둔화로 밀 선물 가격이 3개월 만에 최저치를 기록했습니다.',
+        url: 'https://example.com/news/wheat-prices-decline',
+        source: 'AgriNews',
+        publishedAt: new Date('2026-01-22T11:00:00'),
+        relatedCommodities: ['wheat'], // Wheat
+        imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800',
+        sentiment: 'negative'
+    },
+    {
+        id: 'news-7',
+        title: '백금 시장 전망 개선, 수소 경제 성장 기대',
+        summary: '수소 연료전지 기술 발전과 자동차 산업의 회복으로 백금 수요가 증가할 것으로 전망됩니다. 가격은 온스당 $1,150를 돌파했습니다.',
+        url: 'https://example.com/news/platinum-hydrogen-economy',
+        source: 'Metals Daily',
+        publishedAt: new Date('2026-01-22T07:30:00'),
+        relatedCommodities: ['3'], // Platinum
+        imageUrl: 'https://images.unsplash.com/photo-1621259182978-fbf93132d53d?w=800',
+        sentiment: 'positive'
+    },
+    {
+        id: 'news-8',
+        title: '커피 가격 급등, 기후 변화로 생산량 감소',
+        summary: '주요 생산국인 브라질과 베트남의 가뭄으로 커피 생산량이 크게 감소하며 가격이 급등하고 있습니다. 소비자 가격 인상이 불가피할 전망입니다.',
+        url: 'https://example.com/news/coffee-climate-crisis',
+        source: 'Coffee World',
+        publishedAt: new Date('2026-01-21T13:15:00'),
+        relatedCommodities: ['coffee'], // Coffee
+        imageUrl: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=800',
+        sentiment: 'negative'
+    }
+];
