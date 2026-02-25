@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart, Line, ReferenceLine } from 'recharts';
 import { Commodity, CommodityCategory } from '@/types';
-import { formatCurrency, formatPercent } from '@/utils/formatters';
+import { formatPercent, formatPriceWithCurrency } from '@/utils/formatters';
+import { useCurrencyStore } from '@/store/currencyStore';
 import styles from './CommodityDetailModal.module.css';
 
 interface CommodityDetailModalProps {
@@ -46,6 +47,7 @@ interface DrawingObject {
 }
 
 export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ commodity, onClose }) => {
+    const { currency } = useCurrencyStore();
     const [timeRange, setTimeRange] = useState<TimeRange>('1M');
     const [activeIndicators, setActiveIndicators] = useState({
         sma20: true,
@@ -523,14 +525,14 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                         </div>
                         <div className={styles.priceInfo}>
                             <div className={styles.currentPrice}>
-                                {formatCurrency(commodity.currentPrice, commodity.currency)}
+                                {formatPriceWithCurrency(commodity.currentPrice, currency)}
                             </div>
                             <div className={`${styles.priceChange} ${commodity.change >= 0 ? styles.positive : styles.negative}`}>
-                                {commodity.change >= 0 ? '+' : ''}{commodity.change} ({commodity.change >= 0 ? '+' : ''}{formatPercent(commodity.changePercent)})
+                                {commodity.change >= 0 ? '+' : ''}{formatPriceWithCurrency(Math.abs(commodity.change), currency)} ({commodity.change >= 0 ? '+' : ''}{formatPercent(commodity.changePercent)})
                             </div>
                             <div className={styles.dayRange}>
-                                <span>L: {formatCurrency(stats.low, commodity.currency)}</span>
-                                <span>H: {formatCurrency(stats.high, commodity.currency)}</span>
+                                <span>L: {formatPriceWithCurrency(stats.low, currency)}</span>
+                                <span>H: {formatPriceWithCurrency(stats.high, currency)}</span>
                             </div>
                         </div>
                     </div>
@@ -747,19 +749,19 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                                     </div>
                                     <div className={styles.candleInfoItem}>
                                         <span className={styles.candleInfoLabel}>O:</span>
-                                        <span className={styles.candleInfoValue}>{formatCurrency(selectedCandle.open, commodity.currency)}</span>
+                                        <span className={styles.candleInfoValue}>{formatPriceWithCurrency(selectedCandle.open, currency)}</span>
                                     </div>
                                     <div className={styles.candleInfoItem}>
                                         <span className={styles.candleInfoLabel}>H:</span>
-                                        <span className={styles.candleInfoValue} style={{ color: '#10b981' }}>{formatCurrency(selectedCandle.high, commodity.currency)}</span>
+                                        <span className={styles.candleInfoValue} style={{ color: '#10b981' }}>{formatPriceWithCurrency(selectedCandle.high, currency)}</span>
                                     </div>
                                     <div className={styles.candleInfoItem}>
                                         <span className={styles.candleInfoLabel}>L:</span>
-                                        <span className={styles.candleInfoValue} style={{ color: '#ef4444' }}>{formatCurrency(selectedCandle.low, commodity.currency)}</span>
+                                        <span className={styles.candleInfoValue} style={{ color: '#ef4444' }}>{formatPriceWithCurrency(selectedCandle.low, currency)}</span>
                                     </div>
                                     <div className={styles.candleInfoItem}>
                                         <span className={styles.candleInfoLabel}>C:</span>
-                                        <span className={styles.candleInfoValue}>{formatCurrency(selectedCandle.close, commodity.currency)}</span>
+                                        <span className={styles.candleInfoValue}>{formatPriceWithCurrency(selectedCandle.close, currency)}</span>
                                     </div>
                                     <div className={styles.candleInfoItem}>
                                         <span className={styles.candleInfoLabel}>Vol:</span>
@@ -787,15 +789,15 @@ export const CommodityDetailModal: React.FC<CommodityDetailModalProps> = ({ comm
                             <div className={styles.statsGrid}>
                                 <div className={styles.statItem}>
                                     <span className={styles.statLabel}>High</span>
-                                    <span className={styles.statValue} style={{ color: '#10b981' }}>{formatCurrency(stats.high, commodity.currency)}</span>
+                                    <span className={styles.statValue} style={{ color: '#10b981' }}>{formatPriceWithCurrency(stats.high, currency)}</span>
                                 </div>
                                 <div className={styles.statItem}>
                                     <span className={styles.statLabel}>Low</span>
-                                    <span className={styles.statValue} style={{ color: '#ef4444' }}>{formatCurrency(stats.low, commodity.currency)}</span>
+                                    <span className={styles.statValue} style={{ color: '#ef4444' }}>{formatPriceWithCurrency(stats.low, currency)}</span>
                                 </div>
                                 <div className={styles.statItem}>
                                     <span className={styles.statLabel}>Average</span>
-                                    <span className={styles.statValue}>{formatCurrency(stats.avg, commodity.currency)}</span>
+                                    <span className={styles.statValue}>{formatPriceWithCurrency(stats.avg, currency)}</span>
                                 </div>
                             </div>
                         </div>

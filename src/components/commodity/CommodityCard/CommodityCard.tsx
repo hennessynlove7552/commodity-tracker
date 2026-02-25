@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import type { Commodity } from '@/types';
-import { formatCurrency, formatPercent } from '@/utils/formatters';
+import { formatPercent, formatPriceWithCurrency } from '@/utils/formatters';
+import { useCurrencyStore } from '@/store/currencyStore';
 import styles from './CommodityCard.module.css';
 
 interface CommodityCardProps {
@@ -19,6 +20,7 @@ export const CommodityCard: React.FC<CommodityCardProps> = ({
     onToggleWatchlist,
 }) => {
     const isPositive = commodity.changePercent >= 0;
+    const { currency } = useCurrencyStore();
 
     return (
         <motion.div
@@ -49,14 +51,14 @@ export const CommodityCard: React.FC<CommodityCardProps> = ({
             </div>
 
             <div className={styles.price}>
-                {formatCurrency(commodity.currentPrice, commodity.currency)}
+                {formatPriceWithCurrency(commodity.currentPrice, currency)}
             </div>
 
             <div className={`${styles.change} ${isPositive ? styles.positive : styles.negative}`}>
                 {isPositive ? <FiTrendingUp size={16} /> : <FiTrendingDown size={16} />}
                 <span>{formatPercent(commodity.changePercent)}</span>
                 <span className={styles.changeAmount}>
-                    ({formatCurrency(Math.abs(commodity.change), commodity.currency)})
+                    ({formatPriceWithCurrency(Math.abs(commodity.change), currency)})
                 </span>
             </div>
         </motion.div>

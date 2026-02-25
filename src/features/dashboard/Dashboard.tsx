@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useCommodities } from '@/hooks/useCommodities';
 import { useWatchlistStore } from '@/store/watchlistStore';
+import { useCurrencyStore, USD_TO_KRW_RATE } from '@/store/currencyStore';
 import { CommodityGrid } from '@/components/commodity/CommodityGrid';
 import { CommodityDetailModal } from '@/components/commodity/CommodityDetailModal';
 import { NewsSection } from '@/components/news';
@@ -44,6 +45,7 @@ export const Dashboard: React.FC = () => {
 
     const { data: commodities, isLoading, error } = useCommodities();
     const { watchlist, toggleWatchlist } = useWatchlistStore();
+    const { currency, toggleCurrency } = useCurrencyStore();
 
     // Get available subcategories for selected category
     const availableSubcategories = useMemo(() => {
@@ -112,10 +114,33 @@ export const Dashboard: React.FC = () => {
         <div className={styles.dashboard}>
             <div className="container">
                 <header className={styles.header}>
-                    <h1 className={styles.title}>원자재 시장 대시보드</h1>
-                    <p className={styles.subtitle}>
-                        실시간 원자재 가격 정보를 확인하세요
-                    </p>
+                    <div className={styles.headerTop}>
+                        <div>
+                            <h1 className={styles.title}>원자재 시장 대시보드</h1>
+                            <p className={styles.subtitle}>
+                                실시간 원자재 가격 정보를 확인하세요
+                            </p>
+                        </div>
+                        <div className={styles.currencyToggleWrapper}>
+                            <button
+                                id="currency-toggle-btn"
+                                className={styles.currencyToggleBtn}
+                                onClick={toggleCurrency}
+                                aria-label={`통화 전환: 현재 ${currency}`}
+                            >
+                                <span className={currency === 'USD' ? styles.currencyActive : styles.currencyInactive}>
+                                    $ USD
+                                </span>
+                                <span className={styles.currencyDivider}>|</span>
+                                <span className={currency === 'KRW' ? styles.currencyActive : styles.currencyInactive}>
+                                    ₩ KRW
+                                </span>
+                            </button>
+                            <p className={styles.exchangeRate}>
+                                기준환율 1 USD = {USD_TO_KRW_RATE.toLocaleString()}원
+                            </p>
+                        </div>
+                    </div>
 
                     {/* Tab Navigation */}
                     <div className={styles.tabs}>

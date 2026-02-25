@@ -4,10 +4,9 @@ import { ko } from 'date-fns/locale';
 
 /**
  * Format currency value
+ * KRW는 소수점 없이 정수 표시, USD/기타는 소수점 2자리 표시
  */
 export const formatCurrency = (value: number, currency: string = 'USD'): string => {
-    const formatted = numeral(value).format('0,0.00');
-
     const symbols: Record<string, string> = {
         USD: '$',
         KRW: '₩',
@@ -17,7 +16,31 @@ export const formatCurrency = (value: number, currency: string = 'USD'): string 
     };
 
     const symbol = symbols[currency] || currency;
+
+    if (currency === 'KRW' || currency === 'JPY') {
+        // 원화/엔화는 정수 표시
+        const formatted = numeral(value).format('0,0');
+        return `${symbol}${formatted}`;
+    }
+
+    const formatted = numeral(value).format('0,0.00');
     return `${symbol}${formatted}`;
+};
+
+/**
+ * Format price with currency conversion
+ * USD 기준 가격을 선택한 통화로 변환 후 포맷
+ */
+export const formatPriceWithCurrency = (
+    usdPrice: number,
+    displayCurrency: 'USD' | 'KRW',
+    usdToKrwRate: number = 1450
+): string => {
+    if (displayCurrency === 'KRW') {
+        const krwPrice = usdPrice * usdToKrwRate;
+        return formatCurrency(krwPrice, 'KRW');
+    }
+    return formatCurrency(usdPrice, 'USD');
 };
 
 /**
